@@ -28,18 +28,19 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accept Android SDK licenses
-        run: yes | sdkmanager --licenses > /dev/null 2>&1 || true
-
-      - name: Install SDK / NDK / CMake
+      - name: Install Android SDK / NDK / CMake
         run: |
-          sdkmanager "platform-tools" \
-                     "platforms;android-37" \
-                     "ndk;26.1.10909125" \
-                     "cmake;3.22.1"
+          set -e
+          export ANDROID_HOME="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          SDKMANAGER="$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | head -1)"
+          [ -x "$SDKMANAGER" ] || SDKMANAGER="$(command -v sdkmanager)"
+          echo "sdkmanager=$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null 2>&1 || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-37" \
+                         "ndk;26.1.10909125" "cmake;3.22.1"
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -57,12 +58,14 @@ jobs:
         run: ./gradlew :app:assembleDebug :app:assembleRelease --no-daemon --stacktrace
 
       - name: Collect APKs
+        if: always()
         run: |
           mkdir -p artifacts
-          find app/build/outputs/apk -name '*.apk' -exec cp -v {} artifacts/ \; || true
-          ls -la artifacts
+          find app/build/outputs/apk -name '*.apk' -exec cp -v {} artifacts/ \; 2>/dev/null || true
+          ls -la artifacts || true
 
       - name: Upload APK artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: infinite-buildtool-apk
