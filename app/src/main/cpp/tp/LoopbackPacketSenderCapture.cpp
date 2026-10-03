@@ -131,7 +131,9 @@ struct PendingMapChestOutboundClose {
 
 PendingMapChestOutboundClose inspectPendingMapChestOutboundClose(
         const void* packet) noexcept {
-    constexpr uintptr_t kContainerCloseVtableRva = 0x128E4168ULL;
+    // NetEase x19 3.9.15.297907: vtable moved +0x1B28 within the data region
+    // (verified through 4 code sites loading it, all shifted +0x38A8).
+    constexpr uintptr_t kContainerCloseVtableRva = 0x128E5C90ULL;
     constexpr size_t kContainerClosePacketBytes = 0x2FU;
     constexpr size_t kWindowIdOffset = 0x2CU;
     constexpr size_t kWindowTypeOffset = 0x2DU;

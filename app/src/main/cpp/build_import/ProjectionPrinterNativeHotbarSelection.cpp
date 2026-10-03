@@ -19,13 +19,13 @@ namespace {
 // These offsets belong only to the verified arm64 Bedrock 1.21.120 image
 // (protocol 859, SHA-1 ccf9c31f3121a46e89d868dcedb239466b3ac726).  Every
 // entry is fingerprinted before it can be hooked or called.
-constexpr uintptr_t kHudScreenControllerConstructorRva = 0x06DE2B9CULL;
-constexpr uintptr_t kHudScreenControllerDestructorRva = 0x06DE7E44ULL;
-constexpr uintptr_t kHudScreenControllerSelectSlotRva = 0x06DF391CULL;
-constexpr uintptr_t kHudScreenControllerTickRva = 0x06DE94A8ULL;
-constexpr uintptr_t kClientInstanceScreenModelSelectSlotRva = 0x06AA6C54ULL;
+constexpr uintptr_t kHudScreenControllerConstructorRva = 0x06DE30A0ULL;
+constexpr uintptr_t kHudScreenControllerDestructorRva = 0x06DE8348ULL;
+constexpr uintptr_t kHudScreenControllerSelectSlotRva = 0x06DF3E20ULL;
+constexpr uintptr_t kHudScreenControllerTickRva = 0x06DE99ACULL;
+constexpr uintptr_t kClientInstanceScreenModelSelectSlotRva = 0x06AA7158ULL;
 constexpr uintptr_t kHudScreenControllerModelOffset = 0x920ULL;
-constexpr uintptr_t kHudScreenControllerVtableRva = 0x126DB970ULL;
+constexpr uintptr_t kHudScreenControllerVtableRva = 0x126DD498ULL;
 
 constexpr std::array<uint8_t, 24U> kHudConstructorFingerprint{{
     0xFDU, 0x7BU, 0xBAU, 0xA9U, 0xFCU, 0x6FU, 0x01U, 0xA9U,

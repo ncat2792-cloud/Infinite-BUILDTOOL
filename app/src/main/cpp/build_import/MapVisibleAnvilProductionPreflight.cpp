@@ -83,7 +83,7 @@ bool isAnvilIdentifier(const std::string& identifier) {
 // ContainerOpenPacketSender when building its ItemUse position. Keep this
 // local check independent of NativeWorldAccess's Python/camera fallback:
 // third-person camera position is not proof of player interaction range.
-constexpr uintptr_t kGetPlayerPositionRva = 0x0D8DFF5CULL;
+constexpr uintptr_t kGetPlayerPositionRva = 0x0D8E1C5CULL;
 constexpr std::array<uint8_t, 32U> kGetPlayerPositionFingerprint{{
     0x00U, 0x44U, 0x41U, 0xF9U, 0xC0U, 0x03U, 0x5FU, 0xD6U,
     0x08U, 0x4CU, 0x41U, 0xF9U, 0x20U, 0x00U, 0x40U, 0xFDU,

@@ -47,12 +47,12 @@ bool isFilledMap(const std::string& identifier) noexcept {
 bool automaticResultClickSupported() noexcept {
     return true;
 }
-constexpr uintptr_t kResultHandlerRva = 0x05FD22E8ULL;
+constexpr uintptr_t kResultHandlerRva = 0x05FD267CULL;
 constexpr uint8_t kResultHandlerFingerprint[32] = {
     0xFF,0xC3,0x02,0xD1,0xFD,0x7B,0x07,0xA9,0xF7,0x43,0x00,0xF9,0xF6,0x57,0x09,0xA9,
     0xF4,0x4F,0x0A,0xA9,0xFD,0xC3,0x01,0x91,0x57,0xD0,0x3B,0xD5,0x49,0x00,0x80,0x52,
 };
-constexpr uintptr_t kRequestPacketVtableRva = 0x12951140ULL;
+constexpr uintptr_t kRequestPacketVtableRva = 0x12952C68ULL;
 
 // The game's result handler queues its ItemStackRequest; sendToServer may run
 // on a later tick after Submit has returned. No pointer into the Submit stack

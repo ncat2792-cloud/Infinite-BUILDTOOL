@@ -34,19 +34,19 @@ namespace {
 // additionally has an executable-segment and prologue fingerprint gate; a
 // different client build therefore fails closed instead of emitting an
 // ItemStackRequest with guessed native layouts.
-constexpr uintptr_t kGetSelectedItemRva = 0x0DC399FCULL;
-constexpr uintptr_t kGetInventoryRva = 0x0DC25658ULL;
-constexpr uintptr_t kGetPackedSelectedStateRva = 0x0DC36E44ULL;
-constexpr uintptr_t kDefaultNetIdVariantRva = 0x0DACE134ULL;
-constexpr uintptr_t kNetIdPredicateRva = 0x0DACE690ULL;
-constexpr uintptr_t kPlaceActionConstructorRva = 0x0DAA2390ULL;
-constexpr uintptr_t kSwapActionConstructorRva = 0x0DAA2468ULL;
-constexpr uintptr_t kItemStackRequestVtableRva = 0x12AAA500ULL;
-constexpr uintptr_t kPlaceActionVtableRva = 0x12AA8130ULL;
-constexpr uintptr_t kSwapActionVtableRva = 0x12AA8178ULL;
-constexpr uintptr_t kActionCompleteDestructorRva = 0x0DAAE378ULL;
-constexpr uintptr_t kPlaceActionDeletingDestructorRva = 0x0DAAE168ULL;
-constexpr uintptr_t kSwapActionDeletingDestructorRva = 0x0DAAE218ULL;
+constexpr uintptr_t kGetSelectedItemRva = 0x0DC3B6FCULL;
+constexpr uintptr_t kGetInventoryRva = 0x0DC27358ULL;
+constexpr uintptr_t kGetPackedSelectedStateRva = 0x0DC38B44ULL;
+constexpr uintptr_t kDefaultNetIdVariantRva = 0x0DACFE34ULL;
+constexpr uintptr_t kNetIdPredicateRva = 0x0DAD0390ULL;
+constexpr uintptr_t kPlaceActionConstructorRva = 0x0DAA4090ULL;
+constexpr uintptr_t kSwapActionConstructorRva = 0x0DAA4168ULL;
+constexpr uintptr_t kItemStackRequestVtableRva = 0x12AAC028ULL;
+constexpr uintptr_t kPlaceActionVtableRva = 0x12AA9C58ULL;
+constexpr uintptr_t kSwapActionVtableRva = 0x12AA9CA0ULL;
+constexpr uintptr_t kActionCompleteDestructorRva = 0x0DAB0078ULL;
+constexpr uintptr_t kPlaceActionDeletingDestructorRva = 0x0DAAFE68ULL;
+constexpr uintptr_t kSwapActionDeletingDestructorRva = 0x0DAAFF18ULL;
 
 constexpr size_t kInventoryContainerReadyOffset = 0x118U;
 constexpr size_t kInventoryContainerOffset = 0x120U;
@@ -62,22 +62,22 @@ constexpr uint8_t kInventoryContainer = 30U;
 // client-screen prediction scope. Registering one here lets a later failed
 // screen-finalization response retire its predictive containers and notify the
 // HUD with stale slot data after our local InventorySlot refresh.
-constexpr uintptr_t kRequestDataConstructorRva = 0x0DAA4018ULL;
-constexpr uintptr_t kRequestDataDestructorRva = 0x0DAA3EB4ULL;
-constexpr uintptr_t kRequestDataAddActionRva = 0x0DAA5A18ULL;
-constexpr uintptr_t kRequestBatchConstructorRva = 0x0DAA31C4ULL;
-constexpr uintptr_t kRequestBatchDestructorRva = 0x0DAA3134ULL;
-constexpr uintptr_t kRequestBatchAddRequestRva = 0x0DAA3E60ULL;
-constexpr uintptr_t kRequestPacketConstructorRva = 0x0B4C4A04ULL;
-constexpr uintptr_t kRequestPacketDestructorRva = 0x0B4C4944ULL;
-constexpr uintptr_t kRequestPacketDeletingDestructorRva = 0x0B4C498CULL;
-constexpr uintptr_t kRequestPacketIdFunctionRva = 0x0B4C4A40ULL;
-constexpr uintptr_t kRequestPacketVtableRva = 0x12951140ULL;
-constexpr uintptr_t kGameAllocateRva = 0x1252FA00ULL;
-constexpr uintptr_t kGameDeallocateRva = 0x1252FA20ULL;
-constexpr uintptr_t kRequestCounterInstructionsRva = 0x0DAD342CULL;
-constexpr uintptr_t kRequestCounterRva = 0x133D31F0ULL;
-constexpr uintptr_t kRequestSendToServerRva = 0x0A785BB0ULL;
+constexpr uintptr_t kRequestDataConstructorRva = 0x0DAA5D18ULL;
+constexpr uintptr_t kRequestDataDestructorRva = 0x0DAA5BB4ULL;
+constexpr uintptr_t kRequestDataAddActionRva = 0x0DAA7718ULL;
+constexpr uintptr_t kRequestBatchConstructorRva = 0x0DAA4EC4ULL;
+constexpr uintptr_t kRequestBatchDestructorRva = 0x0DAA4E34ULL;
+constexpr uintptr_t kRequestBatchAddRequestRva = 0x0DAA5B60ULL;
+constexpr uintptr_t kRequestPacketConstructorRva = 0x0B4C66F8ULL;
+constexpr uintptr_t kRequestPacketDestructorRva = 0x0B4C6638ULL;
+constexpr uintptr_t kRequestPacketDeletingDestructorRva = 0x0B4C6680ULL;
+constexpr uintptr_t kRequestPacketIdFunctionRva = 0x0B4C6734ULL;
+constexpr uintptr_t kRequestPacketVtableRva = 0x12952C68ULL;
+constexpr uintptr_t kGameAllocateRva = 0x12531EA0ULL;
+constexpr uintptr_t kGameDeallocateRva = 0x12531EC0ULL;
+constexpr uintptr_t kRequestCounterInstructionsRva = 0x0DAD512CULL;
+constexpr uintptr_t kRequestCounterRva = 0x133D4D18ULL;
+constexpr uintptr_t kRequestSendToServerRva = 0x0A7878A4ULL;
 constexpr size_t kRequestDataSize = 0x48U;
 constexpr size_t kRequestBatchSize = 0x18U;
 constexpr size_t kRequestPacketSize = 0x38U;
@@ -138,13 +138,13 @@ constexpr std::array<uint8_t, 32U> kRequestSendToServerFingerprint{{
 // actual ItemStack into NetworkItemStackDescriptor and supplies the player
 // container/storage context. Native complete destructors release only fields,
 // never our stack-allocated object storage.
-constexpr uintptr_t kClientSlotConstructorRva = 0x0B4BE504ULL;
-constexpr uintptr_t kClientSlotWriteRva = 0x0B4BE6F8ULL;
-constexpr uintptr_t kClientSlotCompleteDestructorRva = 0x092FE898ULL;
-constexpr uintptr_t kClientSlotVtableRva = 0x12950F58ULL;
-constexpr uintptr_t kBinaryStreamConstructorRva = 0x120B7D7CULL;
-constexpr uintptr_t kBinaryStreamCompleteDestructorRva = 0x120C44A4ULL;
-constexpr uintptr_t kBinaryStreamVtableRva = 0x12D61178ULL;
+constexpr uintptr_t kClientSlotConstructorRva = 0x0B4C01F8ULL;
+constexpr uintptr_t kClientSlotWriteRva = 0x0B4C03ECULL;
+constexpr uintptr_t kClientSlotCompleteDestructorRva = 0x09302160ULL;
+constexpr uintptr_t kClientSlotVtableRva = 0x12952A80ULL;
+constexpr uintptr_t kBinaryStreamConstructorRva = 0x120B980CULL;
+constexpr uintptr_t kBinaryStreamCompleteDestructorRva = 0x120C5F34ULL;
+constexpr uintptr_t kBinaryStreamVtableRva = 0x12D62CA0ULL;
 constexpr size_t kNativeClientSlotSize = 0xE8U;
 constexpr size_t kNativeBinaryStreamSize = 0x48U;
 constexpr size_t kNativeStreamStringOffset = 0x08U;
@@ -155,20 +155,20 @@ constexpr size_t kMaximumNativeSlotPacketBytes = 10U * 1024U * 1024U;
 // 0x0F03AA08/0x0F03AA10 in the same ccf9c31f game image. The first accessor
 // loads ItemStackBase's CompoundTag pointer; the second reads TAG_Long
 // "map_uuid" and returns -1 if it is absent. Both are read-only.
-constexpr uintptr_t kItemStackUserDataRva = 0x0E2C41A8ULL;
-constexpr uintptr_t kMapUuidFromCompoundRva = 0x0E2B2B10ULL;
+constexpr uintptr_t kItemStackUserDataRva = 0x0E2C5E68ULL;
+constexpr uintptr_t kMapUuidFromCompoundRva = 0x0E2B47D0ULL;
 // AnvilContainerManagerController's UI recomputation calls this getter with
 // index 0 for its real input stack. The single-hook Frida boundary trace
 // confirmed this call boundary without modifying the game's ItemStack.
-constexpr uintptr_t kAnvilInputGetterRva = 0x0DB8F5C4ULL;
-constexpr uintptr_t kAnvilManagerVtableRva = 0x127DE658ULL;
+constexpr uintptr_t kAnvilInputGetterRva = 0x0DB912C4ULL;
+constexpr uintptr_t kAnvilManagerVtableRva = 0x127E0180ULL;
 constexpr uintptr_t kAnvilPreviewItemOffset = 0x130ULL;
 constexpr size_t kAnvilPreviewItemSize = 0xE8U;
 constexpr uintptr_t kAnvilRecipeIdOffset = 0x218ULL;
 static_assert(kAnvilPreviewItemSize == kItemStackNetVariantOffset,
               "anvil preview must end before the ItemStack network variant");
-constexpr uintptr_t kAnvilRecipeAssignRva = 0x088F2960ULL;
-constexpr uintptr_t kAnvilRecipeUseRva = 0x088F625CULL;
+constexpr uintptr_t kAnvilRecipeAssignRva = 0x088F62CCULL;
+constexpr uintptr_t kAnvilRecipeUseRva = 0x088F9BC8ULL;
 constexpr std::array<uint8_t, 32U> kAnvilRecipeAssignFingerprint{{
     0x60,0x62,0x08,0x91,0xE1,0xC3,0x12,0x91,0x83,0x82,0x54,0x95,0xE0,0xC3,0x12,0x91,
     0x78,0x82,0x54,0x95,0xA8,0xE2,0x41,0x39,0xA8,0x05,0x00,0x34,0xA8,0x06,0x40,0xF9,
@@ -177,7 +177,7 @@ constexpr std::array<uint8_t, 32U> kAnvilRecipeUseFingerprint{{
     0x61,0x62,0x08,0x91,0xE2,0x03,0x1F,0x2A,0xF5,0x03,0x00,0xAA,0x25,0xC3,0x45,0x95,
     0xF5,0x0B,0x00,0xF9,0xE1,0x43,0x00,0x91,0xE0,0x03,0x14,0xAA,0x47,0xBE,0x46,0x95,
 }};
-constexpr uintptr_t kItemInstanceDescriptorCopyRva = 0x0E2B7A38ULL;
+constexpr uintptr_t kItemInstanceDescriptorCopyRva = 0x0E2B96F8ULL;
 constexpr std::array<uint8_t, 32U> kItemInstanceDescriptorCopyFingerprint{{
     0xFF,0x03,0x02,0xD1,0xFD,0x7B,0x03,0xA9,0xFA,0x67,0x04,0xA9,0xF8,0x5F,0x05,0xA9,
     0xF6,0x57,0x06,0xA9,0xF4,0x4F,0x07,0xA9,0xFD,0xC3,0x00,0x91,0x57,0xD0,0x3B,0xD5,
@@ -190,11 +190,15 @@ constexpr std::array<uint8_t, 8U> kItemStackUserDataFingerprint{{
     0x00U, 0x08U, 0x40U, 0xF9U, 0xC0U, 0x03U, 0x5FU, 0xD6U,
 }};
 constexpr std::array<uint8_t, 32U> kMapUuidFromCompoundFingerprint{{
-    0xFDU, 0x7BU, 0xBEU, 0xA9U, 0xF3U, 0x0BU, 0x00U, 0xF9U,
-    0xFDU, 0x03U, 0x00U, 0x91U, 0xE0U, 0x01U, 0x00U, 0xB4U,
-    0xA1U, 0x99U, 0xFAU, 0xF0U, 0x21U, 0x64U, 0x23U, 0x91U,
-    0x02U, 0x01U, 0x80U, 0x52U, 0x83U, 0x00U, 0x80U, 0x52U,
-}};
+        0xFDU, 0x7BU, 0xBEU, 0xA9U,
+        0xF3U, 0x0BU, 0x00U, 0xF9U,
+        0xFDU, 0x03U, 0x00U, 0x91U,
+        0xE0U, 0x01U, 0x00U, 0xB4U,
+        0xA1U, 0x99U, 0xFAU, 0xB0U,
+        0x21U, 0x04U, 0x29U, 0x91U,
+        0x02U, 0x01U, 0x80U, 0x52U,
+        0x83U, 0x00U, 0x80U, 0x52U,
+    }};
 
 constexpr std::array<uint8_t, 32U> kClientSlotConstructorFingerprint{{
     0xFFU, 0x43U, 0x05U, 0xD1U, 0xFDU, 0x7BU, 0x11U, 0xA9U,
@@ -215,11 +219,15 @@ constexpr std::array<uint8_t, 32U> kClientSlotDestructorFingerprint{{
     0x54U, 0xD0U, 0x3BU, 0xD5U, 0x49U, 0xD5U, 0x04U, 0xD0U,
 }};
 constexpr std::array<uint8_t, 32U> kBinaryStreamConstructorFingerprint{{
-    0x48U, 0x65U, 0x00U, 0xD0U, 0x08U, 0xE1U, 0x05U, 0x91U,
-    0xE9U, 0x03U, 0x00U, 0xAAU, 0x0AU, 0x24U, 0x00U, 0x91U,
-    0x1FU, 0x7CU, 0x01U, 0xA9U, 0x3FU, 0x8DU, 0x00U, 0xF8U,
-    0x1FU, 0xFCU, 0x02U, 0xA9U, 0x0AU, 0x10U, 0x00U, 0xF9U,
-}};
+        0x48U, 0x65U, 0x00U, 0xB0U,
+        0x08U, 0x61U, 0x32U, 0x91U,
+        0xE9U, 0x03U, 0x00U, 0xAAU,
+        0x0AU, 0x24U, 0x00U, 0x91U,
+        0x1FU, 0x7CU, 0x01U, 0xA9U,
+        0x3FU, 0x8DU, 0x00U, 0xF8U,
+        0x1FU, 0xFCU, 0x02U, 0xA9U,
+        0x0AU, 0x10U, 0x00U, 0xF9U,
+    }};
 constexpr std::array<uint8_t, 32U> kBinaryStreamDestructorFingerprint{{
     0x08U, 0x20U, 0x40U, 0x39U, 0xE9U, 0x64U, 0x00U, 0xB0U,
     0x29U, 0x41U, 0x05U, 0x91U, 0x09U, 0x00U, 0x00U, 0xF9U,
@@ -228,11 +236,15 @@ constexpr std::array<uint8_t, 32U> kBinaryStreamDestructorFingerprint{{
 }};
 
 constexpr std::array<uint8_t, 32U> kGetSelectedItemFingerprint{{
-    0x08U, 0x0CU, 0x46U, 0xF9U, 0x09U, 0x61U, 0x44U, 0x39U,
-    0x89U, 0x00U, 0x00U, 0x34U, 0x40U, 0xBDU, 0x02U, 0xB0U,
-    0x00U, 0x20U, 0x30U, 0x91U, 0xC0U, 0x03U, 0x5FU, 0xD6U,
-    0x00U, 0x91U, 0x40U, 0xF9U, 0x01U, 0x11U, 0x40U, 0xB9U,
-}};
+        0x08U, 0x0CU, 0x46U, 0xF9U,
+        0x09U, 0x61U, 0x44U, 0x39U,
+        0x89U, 0x00U, 0x00U, 0x34U,
+        0x40U, 0xBDU, 0x02U, 0xB0U,
+        0x00U, 0xA0U, 0x1CU, 0x91U,
+        0xC0U, 0x03U, 0x5FU, 0xD6U,
+        0x00U, 0x91U, 0x40U, 0xF9U,
+        0x01U, 0x11U, 0x40U, 0xB9U,
+    }};
 constexpr std::array<uint8_t, 32U> kGetInventoryFingerprint{{
     0x00U, 0x0CU, 0x46U, 0xF9U, 0xC0U, 0x03U, 0x5FU, 0xD6U,
     0xFDU, 0x7BU, 0xBBU, 0xA9U, 0xFAU, 0x67U, 0x01U, 0xA9U,
@@ -264,11 +276,15 @@ constexpr std::array<uint8_t, 32U> kPlaceActionConstructorFingerprint{{
     0xF3U, 0x03U, 0x00U, 0xAAU, 0x08U, 0x10U, 0x00U, 0x79U,
 }};
 constexpr std::array<uint8_t, 32U> kSwapActionConstructorFingerprint{{
-    0xFDU, 0x7BU, 0xBDU, 0xA9U, 0xF6U, 0x57U, 0x01U, 0xA9U,
-    0xF4U, 0x4FU, 0x02U, 0xA9U, 0xFDU, 0x03U, 0x00U, 0x91U,
-    0xE8U, 0x6BU, 0xFAU, 0xB0U, 0xF3U, 0x03U, 0x00U, 0xAAU,
-    0xF4U, 0x03U, 0x00U, 0xAAU, 0x00U, 0x7DU, 0x40U, 0xFDU,
-}};
+        0xFDU, 0x7BU, 0xBDU, 0xA9U,
+        0xF6U, 0x57U, 0x01U, 0xA9U,
+        0xF4U, 0x4FU, 0x02U, 0xA9U,
+        0xFDU, 0x03U, 0x00U, 0x91U,
+        0xC8U, 0x6BU, 0xFAU, 0xF0U,
+        0xF3U, 0x03U, 0x00U, 0xAAU,
+        0xF4U, 0x03U, 0x00U, 0xAAU,
+        0x00U, 0xDDU, 0x40U, 0xFDU,
+    }};
 
 struct alignas(8) NetIdVariant {
     std::array<uint8_t, 0x18U> bytes{};

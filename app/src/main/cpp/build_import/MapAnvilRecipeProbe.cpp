@@ -18,14 +18,14 @@ namespace {
 // ccf9c31f3121a46e89d868dcedb239466b3ac726. The getter's x8 is its
 // indirect result storage; x1/x2 are const ItemStack& inputs. At both copy
 // sites x19 holds that result storage and x1 points to Recipe.networkId.
-constexpr uintptr_t kGetterRva = 0x0DA7CDB8ULL;
-constexpr uintptr_t kRecipeCopySiteARva = 0x0DA7D1E0ULL;
-constexpr uintptr_t kRecipeCopySiteBRva = 0x0DA7D254ULL;
-constexpr uintptr_t kGetterReturnRva = 0x0DA7D2A8ULL;
-constexpr uintptr_t kRecipeMemberRva = 0x0DE0FE18ULL;
-constexpr uintptr_t kRecipeCopyRva = 0x0DE0FE2CULL;
-constexpr uintptr_t kItemStackUserDataRva = 0x0E2C41A8ULL;
-constexpr uintptr_t kMapUuidFromCompoundRva = 0x0E2B2B10ULL;
+constexpr uintptr_t kGetterRva = 0x0DA7EAB8ULL;
+constexpr uintptr_t kRecipeCopySiteARva = 0x0DA7EEE0ULL;
+constexpr uintptr_t kRecipeCopySiteBRva = 0x0DA7EF54ULL;
+constexpr uintptr_t kGetterReturnRva = 0x0DA7EFA8ULL;
+constexpr uintptr_t kRecipeMemberRva = 0x0DE11B18ULL;
+constexpr uintptr_t kRecipeCopyRva = 0x0DE11B2CULL;
+constexpr uintptr_t kItemStackUserDataRva = 0x0E2C5E68ULL;
+constexpr uintptr_t kMapUuidFromCompoundRva = 0x0E2B47D0ULL;
 
 constexpr std::array<uint8_t, 32> kGetterFingerprint{{
     0xFD,0x7B,0xBA,0xA9,0xFC,0x6F,0x01,0xA9,0xFA,0x67,0x02,0xA9,0xF8,0x5F,0x03,0xA9,

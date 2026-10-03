@@ -18,13 +18,13 @@ namespace {
 // ccf9c31f3121a46e89d868dcedb239466b3ac726 (Bedrock 1.21.120 / protocol 859).
 // The game itself uses this exact InteractPacket constructor for its normal
 // OpenInventory path: action=6, LocalPlayer::getRuntimeID(), Vec3::ZERO.
-constexpr uintptr_t kInteractPacketConstructorRva = 0x0B4BA2A0ULL;
-constexpr uintptr_t kActorRuntimeIdRva = 0x0D8E2B18ULL;
-constexpr uintptr_t kSendToServerRva = 0x0A785BB0ULL;
-constexpr uintptr_t kInteractPacketVtableRva = 0x12950E18ULL;
-constexpr uintptr_t kInteractPacketCompleteDestructorRva = 0x0771B7A8ULL;
-constexpr uintptr_t kInteractPacketDeletingDestructorRva = 0x0B4F3AC4ULL;
-constexpr uintptr_t kInteractPacketIdFunctionRva = 0x0B4BA304ULL;
+constexpr uintptr_t kInteractPacketConstructorRva = 0x0B4BBF94ULL;
+constexpr uintptr_t kActorRuntimeIdRva = 0x0D8E4818ULL;
+constexpr uintptr_t kSendToServerRva = 0x0A7878A4ULL;
+constexpr uintptr_t kInteractPacketVtableRva = 0x12952940ULL;
+constexpr uintptr_t kInteractPacketCompleteDestructorRva = 0x0771F5F4ULL;
+constexpr uintptr_t kInteractPacketDeletingDestructorRva = 0x0B4F57B8ULL;
+constexpr uintptr_t kInteractPacketIdFunctionRva = 0x0B4BBFF8ULL;
 constexpr size_t kInteractPacketSize = 0x48U;
 constexpr uint8_t kInteractOpenInventoryAction = 6U;
 

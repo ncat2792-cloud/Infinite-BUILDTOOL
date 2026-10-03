@@ -21,10 +21,11 @@ struct CommandBlockPacketAbiProfile {
     std::array<uint8_t, 32U> sender_prologue{};
 };
 
-// Keep the original current-address-table profile and the recovered x19
-// 3.8.15 profile together.  The caller identifies a profile by both real code
-// fingerprints before it constructs a game-owned packet or installs a hook.
-inline constexpr std::array<CommandBlockPacketAbiProfile, 2U>
+// Keep the original current-address-table profile, the recovered x19 3.8.15
+// profile, and the x19 3.9.15 (NetEase 3.9.15.297907) profile together.  The
+// caller identifies a profile by both real code fingerprints before it
+// constructs a game-owned packet or installs a hook.
+inline constexpr std::array<CommandBlockPacketAbiProfile, 3U>
     kCommandBlockPacketAbiProfiles{{
         {
             "x19-current-address-table",
@@ -37,6 +38,28 @@ inline constexpr std::array<CommandBlockPacketAbiProfile, 2U>
                 0xFDU, 0x03U, 0x00U, 0x91U, 0xF3U, 0x03U, 0x00U, 0xAAU,
                 0x16U, 0xC0U, 0x0DU, 0x94U, 0x00U, 0xE4U, 0x00U, 0x6FU,
                 0xA8U, 0x28U, 0x04U, 0xF0U, 0x08U, 0xA1U, 0x3BU, 0x91U,
+            }},
+            {{
+                0xFDU, 0x7BU, 0xBBU, 0xA9U, 0xFCU, 0x0BU, 0x00U, 0xF9U,
+                0xF8U, 0x5FU, 0x02U, 0xA9U, 0xF6U, 0x57U, 0x03U, 0xA9U,
+                0xF4U, 0x4FU, 0x04U, 0xA9U, 0xFDU, 0x03U, 0x00U, 0x91U,
+                0xFFU, 0xC3U, 0x08U, 0xD1U, 0x55U, 0xD0U, 0x3BU, 0xD5U,
+            }},
+        },
+        {
+            // NetEase x19 3.9.15.297907.  The constructor and vtable moved
+            // within the 0xA3Cxxxx packet-constructor region; the sender sits
+            // next to newReceivePacket and shifted by the same +0x1CF4.
+            "x19-3.9.15",
+            0x0A3CFD48ULL,
+            0x128E5A10ULL,
+            0x0A7878A4ULL,
+            0xB8U,
+            {{
+                0xFDU, 0x7BU, 0xBEU, 0xA9U, 0xF4U, 0x4FU, 0x01U, 0xA9U,
+                0xFDU, 0x03U, 0x00U, 0x91U, 0xF3U, 0x03U, 0x00U, 0xAAU,
+                0x29U, 0xB9U, 0x0DU, 0x94U, 0x00U, 0xE4U, 0x00U, 0x6FU,
+                0xA8U, 0x28U, 0x04U, 0xD0U, 0x08U, 0x41U, 0x28U, 0x91U,
             }},
             {{
                 0xFDU, 0x7BU, 0xBBU, 0xA9U, 0xFCU, 0x0BU, 0x00U, 0xF9U,

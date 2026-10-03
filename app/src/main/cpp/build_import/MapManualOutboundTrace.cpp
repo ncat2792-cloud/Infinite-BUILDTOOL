@@ -24,20 +24,20 @@ namespace {
 // The offsets below are corroborated by the current native inventory mover
 // and by the request/action constructors in this exact game image. They are
 // read-only; a different game image simply produces no trace.
-constexpr uintptr_t kPacketVtableRva = 0x12951140ULL;
-constexpr uintptr_t kPacketConstructorRva = 0x0B4C4A04ULL;
-constexpr uintptr_t kRequestDataConstructorRva = 0x0DAA4018ULL;
-constexpr uintptr_t kPlaceConstructorRva = 0x0DAA2390ULL;
-constexpr uintptr_t kSwapConstructorRva = 0x0DAA2468ULL;
-constexpr uintptr_t kConsumeConstructorRva = 0x0DAA2D04ULL;
-constexpr uintptr_t kCraftOptionalConstructorRva = 0x0DA66EFCULL;
-constexpr uintptr_t kPlaceVtableRva = 0x12AA8130ULL;
-constexpr uintptr_t kSwapVtableRva = 0x12AA8178ULL;
-constexpr uintptr_t kConsumeVtableRva = 0x12AA8250ULL;
-constexpr uintptr_t kCraftOptionalVtableRva = 0x12AA4978ULL;
+constexpr uintptr_t kPacketVtableRva = 0x12952C68ULL;
+constexpr uintptr_t kPacketConstructorRva = 0x0B4C66F8ULL;
+constexpr uintptr_t kRequestDataConstructorRva = 0x0DAA5D18ULL;
+constexpr uintptr_t kPlaceConstructorRva = 0x0DAA4090ULL;
+constexpr uintptr_t kSwapConstructorRva = 0x0DAA4168ULL;
+constexpr uintptr_t kConsumeConstructorRva = 0x0DAA4A04ULL;
+constexpr uintptr_t kCraftOptionalConstructorRva = 0x0DA68BFCULL;
+constexpr uintptr_t kPlaceVtableRva = 0x12AA9C58ULL;
+constexpr uintptr_t kSwapVtableRva = 0x12AA9CA0ULL;
+constexpr uintptr_t kConsumeVtableRva = 0x12AA9D78ULL;
+constexpr uintptr_t kCraftOptionalVtableRva = 0x12AA64A0ULL;
 // Tag-1 NetIdVariant embeds a predicted-stack request object. Its first word
 // is this process-relative vtable pointer, not a negative network stack ID.
-constexpr uintptr_t kPredictedStackIdVtableRva = 0x12AAA500ULL;
+constexpr uintptr_t kPredictedStackIdVtableRva = 0x12AAC028ULL;
 constexpr size_t kPacketBatchOffset = 0x30U;
 constexpr size_t kRequestIdOffset = 0x08U;
 // RequestDataAddAction at 0x0DAA5A18 writes an 8-byte action owner into the

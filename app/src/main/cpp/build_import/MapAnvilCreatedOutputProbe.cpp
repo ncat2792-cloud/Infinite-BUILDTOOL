@@ -80,11 +80,11 @@ namespace {
 // At site 1 x22 is the post-copy CreatedOutput record; at site 2 x24 is the
 // same record just before it is consumed. These exact bytes are checked before
 // installing instrumentation, so a different game image fails closed.
-constexpr uintptr_t kConstructedRva = 0x0DA7A40CULL;
-constexpr uintptr_t kBeforeConsumeRva = 0x0DA7DAACULL;
-constexpr uintptr_t kAnvilSimulationEntryRva = 0x0DA7E458ULL;
-constexpr uintptr_t kAnvilType2EntryRva = 0x0DA7D388ULL;
-constexpr uintptr_t kCraftOptionalConstructorRva = 0x0DA66EFCULL;
+constexpr uintptr_t kConstructedRva = 0x0DA7C10CULL;
+constexpr uintptr_t kBeforeConsumeRva = 0x0DA7F7ACULL;
+constexpr uintptr_t kAnvilSimulationEntryRva = 0x0DA80158ULL;
+constexpr uintptr_t kAnvilType2EntryRva = 0x0DA7F088ULL;
+constexpr uintptr_t kCraftOptionalConstructorRva = 0x0DA68BFCULL;
 constexpr uint8_t kConstructedFingerprint[32] = {
     0xC0,0x62,0x04,0x91,0x1B,0x00,0x00,0x14,0x00,0xE4,0x00,0x6F,0xFF,0x53,0x00,0xF9,
     0xC0,0x1A,0x80,0x3D,0xE0,0x83,0x01,0xAD,0xE0,0x83,0x02,0xAD,0xE0,0x83,0x03,0xAD,

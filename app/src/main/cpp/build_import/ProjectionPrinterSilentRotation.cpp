@@ -14,23 +14,28 @@ namespace {
 
 // Bedrock 1.21.120 / protocol 859.  All packet writes below are guarded by
 // both this packet vtable profile and the field-validator instruction profile.
-constexpr uintptr_t kPlayerAuthInputVtableRva = 0x129465F0ULL;
-constexpr uintptr_t kPlayerAuthInputCompleteDestructorRva = 0x0B2C4A88ULL;
-constexpr uintptr_t kPlayerAuthInputDeletingDestructorRva = 0x0B2C4B00ULL;
-constexpr uintptr_t kPlayerAuthInputPacketIdFunctionRva = 0x0B2C4E0CULL;
-constexpr uintptr_t kPlayerAuthInputValidatorRva = 0x0B2CB2CCULL;
+constexpr uintptr_t kPlayerAuthInputVtableRva = 0x12949118ULL;
+constexpr uintptr_t kPlayerAuthInputCompleteDestructorRva = 0x0B2C677CULL;
+constexpr uintptr_t kPlayerAuthInputDeletingDestructorRva = 0x0B2C67F4ULL;
+constexpr uintptr_t kPlayerAuthInputPacketIdFunctionRva = 0x0B2C6B00ULL;
+constexpr uintptr_t kPlayerAuthInputValidatorRva = 0x0B2CCFC0ULL;
 constexpr size_t kRotationPitchOffset = 0x2CU;
 constexpr size_t kRotationYawOffset = 0x30U;
 constexpr size_t kHeadYawOffset = 0x40U;
 constexpr size_t kRequiredPacketBytes = kHeadYawOffset + sizeof(float);
 
 constexpr std::array<uint8_t, 40U> kPlayerAuthInputValidatorFingerprint{{
-    0xFFU, 0x03U, 0x01U, 0xD1U, 0xFDU, 0x7BU, 0x02U, 0xA9U,
-    0xF4U, 0x4FU, 0x03U, 0xA9U, 0xFDU, 0x83U, 0x00U, 0x91U,
-    0x54U, 0xD0U, 0x3BU, 0xD5U, 0xF3U, 0x03U, 0x00U, 0xAAU,
-    0x41U, 0xC1U, 0xFBU, 0x90U, 0x21U, 0xD4U, 0x09U, 0x91U,
-    0x88U, 0x16U, 0x40U, 0xF9U, 0x00U, 0xB0U, 0x00U, 0x91U,
-}};
+        0xFFU, 0x03U, 0x01U, 0xD1U,
+        0xFDU, 0x7BU, 0x02U, 0xA9U,
+        0xF4U, 0x4FU, 0x03U, 0xA9U,
+        0xFDU, 0x83U, 0x00U, 0x91U,
+        0x54U, 0xD0U, 0x3BU, 0xD5U,
+        0xF3U, 0x03U, 0x00U, 0xAAU,
+        0x21U, 0xC1U, 0xFBU, 0xF0U,
+        0x21U, 0xCCU, 0x0DU, 0x91U,
+        0x88U, 0x16U, 0x40U, 0xF9U,
+        0x00U, 0xB0U, 0x00U, 0x91U,
+    }};
 constexpr std::array<uint8_t, 8U> kPlayerAuthInputPacketIdFingerprint{{
     0x00U, 0x12U, 0x80U, 0x52U, 0xC0U, 0x03U, 0x5FU, 0xD6U,
 }};

@@ -41,15 +41,15 @@ bool IsMapNativeAnvilCraftPacketCandidate(
 namespace {
 
 // libminecraftpe.so Build ID ccf9c31f3121a46e89d868dcedb239466b3ac726.
-constexpr uintptr_t kPacketVtableRva = 0x12951140ULL;
-constexpr uintptr_t kRequestVtableRva = 0x12AAA500ULL;
-constexpr uintptr_t kCraftOptionalVtableRva = 0x12AA4978ULL;
-constexpr uintptr_t kConsumeVtableRva = 0x12AA8250ULL;
-constexpr uintptr_t kPlaceVtableRva = 0x12AA8130ULL;
+constexpr uintptr_t kPacketVtableRva = 0x12952C68ULL;
+constexpr uintptr_t kRequestVtableRva = 0x12AAC028ULL;
+constexpr uintptr_t kCraftOptionalVtableRva = 0x12AA64A0ULL;
+constexpr uintptr_t kConsumeVtableRva = 0x12AA9D78ULL;
+constexpr uintptr_t kPlaceVtableRva = 0x12AA9C58ULL;
 constexpr size_t kPacketBatchOffset = 0x30U;
 constexpr uint8_t kExpectedBuildId[20] = {
-    0xCC,0xF9,0xC3,0x1F,0x31,0x21,0xA4,0x6E,0x89,0xD8,
-    0x68,0xDC,0xED,0xB2,0x39,0x46,0x6B,0x3A,0xC7,0x26,
+    0xC6,0xD1,0x7B,0xD2,0x3B,0x89,0xEF,0xFA,0x01,0x30,
+    0x94,0x37,0x9E,0x62,0x39,0x46,0x92,0xFC,0xC7,0x83,
 };
 
 size_t align4(size_t value) noexcept { return (value + 3U) & ~size_t{3U}; }

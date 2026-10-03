@@ -152,9 +152,9 @@ void testProtocol859AbiProfile() {
     assert(profile.protocol_version == 859U);
     assert(profile.packet_size == 0x68U);
     assert(profile.compound_size == 0x20U);
-    assert(profile.packet_vtable_rva == 0x128EDF30ULL);
-    assert(profile.packet_typeinfo_rva == 0x128EEBE8ULL);
-    assert(profile.packet_get_id.rva == 0x0A5258F0ULL);
+    assert(profile.packet_vtable_rva == 0x128EFA58ULL);
+    assert(profile.packet_typeinfo_rva == 0x128F0710ULL);
+    assert(profile.packet_get_id.rva == 0x0A529198ULL);
     assert(profile.packet_get_id.prologue[0] == 0x00U);
     assert(profile.packet_get_id.prologue[1] == 0x07U);
     assert(profile.packet_get_id.prologue[2] == 0x80U);

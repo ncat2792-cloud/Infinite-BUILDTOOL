@@ -17,18 +17,23 @@
 namespace build_import {
 namespace {
 
-constexpr uintptr_t kTransactionFactoryRva = 0x0E372F78ULL;
-constexpr uintptr_t kPacketConstructorRva = 0x0B4BF958ULL;
-constexpr uintptr_t kPacketVtableRva = 0x12950FF8ULL;
-constexpr uintptr_t kPacketCompleteDestructorRva = 0x0B4BFA40ULL;
-constexpr uintptr_t kPacketDeletingDestructorRva = 0x0B4BFAD4ULL;
-constexpr uintptr_t kSenderRva = 0x0A785BB0ULL;
-constexpr uintptr_t kGetSelectedItemRva = 0x0DC399FCULL;
-constexpr uintptr_t kGetInventoryRva = 0x0DC25658ULL;
-constexpr uintptr_t kGetPackedSelectedStateRva = 0x0DC36E44ULL;
-constexpr uintptr_t kGetPlayerPositionRva = 0x0D8DFF5CULL;
-constexpr uintptr_t kSetTransactionItemRva = 0x092C109CULL;
-constexpr uintptr_t kSetBlockRuntimeIdRva = 0x0E34DC90ULL;
+// NetEase x19 3.9.15.297907 upgrade.  The 0x0DCxxxxx accessor cluster moved
+// +0x1D00, the 0x0B4Cxxxx packet cluster +0x1CF4, the 0x0E34/0x0E37 data
+// accessors +0x1CC0/+0x1CC0, and the 0x1295xxxx vtable +0x1B28 (same data
+// region shift as the other packet vtables).  Only GetSelectedItem's prologue
+// changed (an inlined string pointer), so its fingerprint is updated too.
+constexpr uintptr_t kTransactionFactoryRva = 0x0E374C38ULL;
+constexpr uintptr_t kPacketConstructorRva = 0x0B4C164CULL;
+constexpr uintptr_t kPacketVtableRva = 0x12952B20ULL;
+constexpr uintptr_t kPacketCompleteDestructorRva = 0x0B4C1734ULL;
+constexpr uintptr_t kPacketDeletingDestructorRva = 0x0B4C17C8ULL;
+constexpr uintptr_t kSenderRva = 0x0A7878A4ULL;
+constexpr uintptr_t kGetSelectedItemRva = 0x0DC3B6FCULL;
+constexpr uintptr_t kGetInventoryRva = 0x0DC27358ULL;
+constexpr uintptr_t kGetPackedSelectedStateRva = 0x0DC38B44ULL;
+constexpr uintptr_t kGetPlayerPositionRva = 0x0D8E1C5CULL;
+constexpr uintptr_t kSetTransactionItemRva = 0x092C4A7CULL;
+constexpr uintptr_t kSetBlockRuntimeIdRva = 0x0E34F950ULL;
 
 constexpr size_t kPacketSize = 0x68U;
 constexpr int32_t kItemUseTransactionType = 2;
@@ -66,7 +71,7 @@ constexpr std::array<uint8_t, 32U> kSenderFingerprint{{
 constexpr std::array<uint8_t, 32U> kGetSelectedItemFingerprint{{
     0x08U, 0x0CU, 0x46U, 0xF9U, 0x09U, 0x61U, 0x44U, 0x39U,
     0x89U, 0x00U, 0x00U, 0x34U, 0x40U, 0xBDU, 0x02U, 0xB0U,
-    0x00U, 0x20U, 0x30U, 0x91U, 0xC0U, 0x03U, 0x5FU, 0xD6U,
+    0x00U, 0xA0U, 0x1CU, 0x91U, 0xC0U, 0x03U, 0x5FU, 0xD6U,
     0x00U, 0x91U, 0x40U, 0xF9U, 0x01U, 0x11U, 0x40U, 0xB9U,
 }};
 constexpr std::array<uint8_t, 32U> kGetInventoryFingerprint{{

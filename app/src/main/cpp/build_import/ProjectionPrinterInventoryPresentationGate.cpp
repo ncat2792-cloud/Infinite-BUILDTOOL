@@ -32,9 +32,9 @@ namespace {
 // earlier approach forced this presentation function's slow screen factory
 // and changed is_showing_menu. That flag does not prevent ScreenManager::push,
 // so the backpack still rendered. No screen or menu getter is hooked now.
-constexpr uintptr_t kContainerOpenInventoryUiBranchRva = 0x0771AE7CULL;
-constexpr uintptr_t kContainerOpenInventoryUiCallRva = 0x0771AEA4ULL;
-constexpr uintptr_t kLocalPlayerOpenInventoryRva = 0x074CBC98ULL;
+constexpr uintptr_t kContainerOpenInventoryUiBranchRva = 0x0771ECC8ULL;
+constexpr uintptr_t kContainerOpenInventoryUiCallRva = 0x0771ECF0ULL;
+constexpr uintptr_t kLocalPlayerOpenInventoryRva = 0x074CC19CULL;
 constexpr std::array<uint8_t, 52U> kContainerOpenInventoryUiFingerprint{{
     0x68U, 0xE6U, 0x40U, 0x39U,  // ldrb w8, [x19, #0x39]
     0x1FU, 0x3DU, 0x00U, 0x71U,  // cmp w8, #0xf
