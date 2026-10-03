@@ -14,7 +14,7 @@ namespace {
 
 // Bedrock 1.21.120 / protocol 859.  All packet writes below are guarded by
 // both this packet vtable profile and the field-validator instruction profile.
-constexpr uintptr_t kPlayerAuthInputVtableRva = 0x12949118ULL;
+constexpr uintptr_t kPlayerAuthInputVtableRva = 0x12948118ULL;
 constexpr uintptr_t kPlayerAuthInputCompleteDestructorRva = 0x0B2C677CULL;
 constexpr uintptr_t kPlayerAuthInputDeletingDestructorRva = 0x0B2C67F4ULL;
 constexpr uintptr_t kPlayerAuthInputPacketIdFunctionRva = 0x0B2C6B00ULL;
