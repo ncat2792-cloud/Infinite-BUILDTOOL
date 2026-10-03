@@ -38,18 +38,18 @@ jobs:
           [ -x "$SDKMANAGER" ] || SDKMANAGER="$(command -v sdkmanager)"
           echo "sdkmanager=$SDKMANAGER"
           yes | "$SDKMANAGER" --licenses >/dev/null 2>&1 || true
-          # API 37 ships on the canary channel; fall back gracefully.
-          for CH in 3 0; do
-            if "$SDKMANAGER" --channel=$CH --install "platform-tools" \
-                 "platforms;android-37" "ndk;26.1.10909125" "cmake;3.22.1"; then
-              OK=1; break
-            fi
-          done
-          if [ -z "$OK" ]; then
-            echo "== android-37 unavailable, listing candidate platforms =="
-            "$SDKMANAGER" --channel=3 --list | grep -E "platforms;android-3" | sort -u
-            exit 1
+          "$SDKMANAGER" --install "platform-tools" \
+                         "ndk;26.1.10909125" "cmake;3.22.1"
+          # API 37 ships as minor-versioned packages (android-37.0/.1/.2).
+          if ! "$SDKMANAGER" --install "platforms;android-37.0"; then
+            "$SDKMANAGER" --channel=3 --install "platforms;android-37.0"
           fi
+          # Expose the unversioned alias AGP expects for compileSdk = 37.
+          if [ -d "$ANDROID_HOME/platforms/android-37.0" ] && [ ! -e "$ANDROID_HOME/platforms/android-37" ]; then
+            ln -s android-37.0 "$ANDROID_HOME/platforms/android-37"
+          fi
+          # Build-tools: install a recent one; AGP auto-downloads its default if missing.
+          "$SDKMANAGER" --install "build-tools;36.0.0" || true
           echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Cache Gradle
