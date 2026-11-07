@@ -1,6 +1,9 @@
 #include "Signatures.h"
 #include "PyEngineAddress.h"
 #include <algorithm>
+#include <cerrno>
+#include <fcntl.h>
+#include <unistd.h>
 #include <atomic>
 #include <cstring>
 #include <array>
@@ -70,6 +73,22 @@ bool CodeOffset(uintptr_t base,uintptr_t offset,size_t size,uintptr_t* result){
     if(!base||base!=Base()||offset>UINTPTR_MAX-base||!at(codeRanges,base+offset,size))return false;*result=base+offset;return true;
 }
 bool Member(uintptr_t base,uintptr_t address) noexcept{return base==Base()&&std::binary_search(members.begin(),members.end(),address);}
+// Safe read of a possibly-invalid address. The bytes are pushed through a pipe
+// instead of being dereferenced directly, so a bad pointer fails the call
+// rather than faulting the game process.
+bool Read(uintptr_t address,void* output,size_t size) noexcept{
+    if(!address||!output||!size||size>4096||size>UINTPTR_MAX-address)return false;
+    struct Channel{int fd[2]{-1,-1};~Channel(){reset();}void reset(){for(int& f:fd){if(f>=0)::close(f);f=-1;}}};
+    static thread_local Channel channel;
+    if(channel.fd[0]<0 && pipe2(channel.fd,O_CLOEXEC|O_NONBLOCK))return false;
+    ssize_t written;
+    do{written=write(channel.fd[1],reinterpret_cast<const void*>(address),size);}while(written<0&&errno==EINTR);
+    if(written!=ssize_t(size)){channel.reset();return false;}
+    ssize_t received;
+    do{received=read(channel.fd[0],output,size);}while(received<0&&errno==EINTR);
+    if(received!=ssize_t(size)){channel.reset();return false;}
+    return true;
+}
 }
 bool PyEngineAddress::ReadyFor(uintptr_t b) noexcept{return b&&b==script_host::Base();}
 bool PyEngineAddress::IsResolvedAddress(uintptr_t b,uintptr_t a) noexcept{return script_host::Member(b,a);}
