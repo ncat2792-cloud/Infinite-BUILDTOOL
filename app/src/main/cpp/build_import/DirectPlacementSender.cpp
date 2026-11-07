@@ -59,7 +59,7 @@ Resolved& resolved() {
     return value;
 }
 
-std::string& diagnostic() {
+std::string& diagnosticText() {
     static std::string value = "尚未初始化";
     return value;
 }
@@ -92,28 +92,28 @@ bool verify() {
     if (resolved().verified) return true;
     const uintptr_t module_base = Main::getBaseAddress();
     if (!module_base) {
-        diagnostic() = "libminecraftpe.so 尚未加载";
+        diagnosticText() = "libminecraftpe.so 尚未加载";
         return false;
     }
     Resolved candidate;
     if (!matchFingerprint(module_base, kBuildBlockRva, kBuildBlockFingerprint,
                           &candidate.build_block)) {
-        diagnostic() = "3.10.5 GameMode::buildBlock 指纹不匹配";
+        diagnosticText() = "3.10.5 GameMode::buildBlock 指纹不匹配";
         return false;
     }
     if (!matchFingerprint(module_base, kGetCarriedItemRva, kGetCarriedItemFingerprint,
                           &candidate.get_carried_item)) {
-        diagnostic() = "3.10.5 Player::getCarriedItem 指纹不匹配";
+        diagnosticText() = "3.10.5 Player::getCarriedItem 指纹不匹配";
         return false;
     }
     if (!exactExecutable(module_base, candidate.build_block) ||
         !exactExecutable(module_base, candidate.get_carried_item)) {
-        diagnostic() = "3.10.5 放置函数不在可执行段内";
+        diagnosticText() = "3.10.5 放置函数不在可执行段内";
         return false;
     }
     candidate.verified = true;
     resolved() = candidate;
-    diagnostic() = "直放已就绪";
+    diagnosticText() = "直放已就绪";
     return true;
 }
 
@@ -131,12 +131,12 @@ bool DirectPlacementSender::available() {
     return verify();
 }
 
-const char* DirectPlacementSender::diagnostic() { return diagnostic().c_str(); }
+const char* DirectPlacementSender::diagnostic() { return diagnosticText().c_str(); }
 
 bool DirectPlacementSender::place(const std::string& block_name, int32_t x, int32_t y, int32_t z,
                                   int face, int32_t hotbar_slot, std::string* error) {
     if (error) error->clear();
-    if (!available()) return fail(error, diagnostic().c_str());
+    if (!available()) return fail(error, diagnosticText().c_str());
     if (face < 0 || face > 5) return fail(error, "放置面必须在 0..5 之间");
     if (block_name.empty()) return fail(error, "目标方块名为空");
 
