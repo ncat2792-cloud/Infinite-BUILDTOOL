@@ -436,9 +436,20 @@ bool Execute(const std::string& source, const std::string& expression, std::stri
     try {
         const std::string bytes = compileSource(wrapper, "<infinitecz-engine>");
         const GilScope gil(engine);
-        Object* code = engine.load(bytes);
-        std::unique_ptr<Object, void (*)(Object*)> code_guard(
-            code, [&engine](Object* value) { engine.decref(value); });
+        // A small explicit guard is used instead of a unique_ptr with a lambda
+        // deleter: a capturing lambda cannot decay to a function pointer, and
+        // the code object must be released under the GIL this scope holds.
+        struct CodeGuard {
+            const Api& owner;
+            Object* value;
+            ~CodeGuard() { owner.decref(value); }
+        };
+        const CodeGuard code_guard{engine, engine.load(bytes)};
+        Object* const code = code_guard.value;
+        if (!code) {
+            setStatus("无法构造 Python 代码对象");
+            return false;
+        }
         Object* module = engine.module();
         Object* globals = engine.dict(module);
         if (!module || !globals) {
