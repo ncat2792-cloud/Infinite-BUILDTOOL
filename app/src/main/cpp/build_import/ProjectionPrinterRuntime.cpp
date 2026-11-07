@@ -2327,8 +2327,11 @@ bool ProjectionPrinterRuntime::serverVerificationEnabled() const {
 }
 
 std::string ProjectionPrinterRuntime::directPlacementDiagnostic() const {
-    return DirectPlacementSender::available() ? DirectPlacementSender::diagnostic()
-                                              : DirectPlacementSender::diagnostic();
+    // available() runs the fingerprint verification, so report its diagnostic
+    // either way: on success it names the resolved entry point, on failure it
+    // says which check rejected the image.
+    DirectPlacementSender::available();
+    return DirectPlacementSender::diagnostic();
 }
 
 void ProjectionPrinterRuntime::setReachabilityPreviewEnabled(bool enabled) {
