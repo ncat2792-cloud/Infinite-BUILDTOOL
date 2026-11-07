@@ -90,6 +90,11 @@ public final class TpModule {
     public static native boolean isBuildProjectionPrinterEnabled();
     public static native void setBuildProjectionPrinterRate(int blocksPerSecond);
     public static native int getBuildProjectionPrinterRate();
+    public static native void setBuildProjectionPrinterDirectPlacement(boolean enabled);
+    public static native boolean isBuildProjectionPrinterDirectPlacement();
+    public static native void setBuildProjectionPrinterServerVerification(boolean enabled);
+    public static native boolean isBuildProjectionPrinterServerVerification();
+    public static native String getBuildProjectionPrinterDirectPlacementDiagnostic();
     public static native int getBuildProjectionPrinterState();
     public static native String getBuildProjectionPrinterStatus();
     public static native long getBuildProjectionPrinterTotalBlocks();

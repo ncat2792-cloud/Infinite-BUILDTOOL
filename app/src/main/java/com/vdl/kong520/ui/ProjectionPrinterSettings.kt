@@ -11,6 +11,8 @@ object ProjectionPrinterSettings {
     private const val PREFS = "build_projection_ui"
     private const val KEY_ENABLED = "projection_printer_enabled"
     private const val KEY_RATE = "projection_printer_rate"
+    private const val KEY_DIRECT = "projection_printer_direct"
+    private const val KEY_SERVER_VERIFY = "projection_printer_server_verify"
 
     const val MIN_RATE = 1
     const val MAX_RATE = 20
@@ -18,14 +20,18 @@ object ProjectionPrinterSettings {
 
     data class Config(
         val enabled: Boolean,
-        val blocksPerSecond: Int
+        val blocksPerSecond: Int,
+        val directPlacement: Boolean = false,
+        val serverVerification: Boolean = true
     )
 
     fun read(context: Context): Config {
         val prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         return Config(
             enabled = prefs.getBoolean(KEY_ENABLED, false),
-            blocksPerSecond = prefs.getInt(KEY_RATE, DEFAULT_RATE).coerceIn(MIN_RATE, MAX_RATE)
+            blocksPerSecond = prefs.getInt(KEY_RATE, DEFAULT_RATE).coerceIn(MIN_RATE, MAX_RATE),
+            directPlacement = prefs.getBoolean(KEY_DIRECT, false),
+            serverVerification = prefs.getBoolean(KEY_SERVER_VERIFY, true)
         )
     }
 
@@ -33,6 +39,20 @@ object ProjectionPrinterSettings {
         context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putBoolean(KEY_ENABLED, enabled)
+            .apply()
+    }
+
+    fun setDirectPlacement(context: Context, enabled: Boolean) {
+        context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_DIRECT, enabled)
+            .apply()
+    }
+
+    fun setServerVerification(context: Context, enabled: Boolean) {
+        context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_SERVER_VERIFY, enabled)
             .apply()
     }
 

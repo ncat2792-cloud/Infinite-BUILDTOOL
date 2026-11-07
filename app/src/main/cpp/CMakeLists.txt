@@ -26,6 +26,10 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 # 4. Load Dobby (with optimizations applied above)
 add_subdirectory(Dobby)
 
+# Private CPython 2.7 compiler used by the 3.10.5 script engine. It produces
+# marshal bytecode only; no interpreter object ever crosses into the game.
+add_subdirectory(pyengine/python)
+
 # Decoder-only Brotli library for streamed BDX structure parsing.  It is kept
 # separate from the game library so the same target can be reused by host tests.
 add_subdirectory(third_party/brotli)
@@ -111,6 +115,7 @@ add_library(
         build_import/ItemRuntimeRegistry.cpp
         build_import/ContainerClosePacketSender.cpp
         build_import/ContainerOpenPacketSender.cpp
+        build_import/DirectPlacementSender.cpp
         build_import/ContainerOpenPacketSenderThunks.S
           build_import/CommandBlockPacketSender.cpp
           build_import/SignBlockActorPacketSender.cpp
@@ -146,6 +151,10 @@ add_library(
         build_import/BuildImportController.cpp
         tp/TpModule.cpp
         tp/FunctionsAddress.cpp
+        pyengine/common/Arm64SignatureScanner.cpp
+        pyengine/common/Signatures.cpp
+        pyengine/common/PyEngineAddress.cpp
+        pyengine/PyEngineBridge.cpp
         tp/MinecraftUpdateHook.cpp
         tp/BuildPacketReceiveHook.cpp
         tp/LoopbackPacketSenderCapture.cpp
@@ -156,6 +165,10 @@ add_library(
 target_include_directories(weibosdkcore PRIVATE
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/Dobby/include
+    ${CMAKE_SOURCE_DIR}/pyengine
+    ${CMAKE_SOURCE_DIR}/pyengine/scripts
+    ${CMAKE_SOURCE_DIR}/pyengine/common
+    ${CMAKE_SOURCE_DIR}/pyengine/python
     ${CMAKE_SOURCE_DIR}/Json
     ${CMAKE_SOURCE_DIR}/openssl_ndk
     #${OPENSSL_INCLUDE_DIR}
@@ -169,6 +182,7 @@ find_library(egl-lib EGL)
 # 7. Link libraries
 target_link_libraries(
         weibosdkcore
+        pyloader_python27_compiler
         build_import_brotli_decoder
         build_import_brotli_encoder
         crypto

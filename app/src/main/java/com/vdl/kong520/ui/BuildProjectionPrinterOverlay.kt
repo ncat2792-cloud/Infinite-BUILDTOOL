@@ -261,6 +261,96 @@ object BuildProjectionPrinterOverlay {
         })
         root.addView(speedPanel)
 
+        // ---- Placement mode ------------------------------------------------
+        // Two independent switches, matching the native runtime: server
+        // verification keeps the confirmation-driven path, direct placement
+        // calls the client's own buildBlock and fires at the configured rate.
+        // Verification wins when both are on, so the panel says so explicitly.
+        val modeToggle = TextView(activity).apply {
+            gravity = Gravity.CENTER_VERTICAL
+            textSize = 9f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(Color.parseColor(ACCENT_DARK))
+            background = rounded(SURFACE, dp(7f), LINE)
+            setPadding(dp(7f), 0, dp(7f), 0)
+            isClickable = true
+            isFocusable = true
+        }
+        root.addView(modeToggle, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            dp(24f)
+        ).apply { topMargin = dp(5f) })
+
+        val modePanel = LinearLayout(activity).apply {
+            orientation = LinearLayout.VERTICAL
+            visibility = View.GONE
+            setPadding(0, dp(3f), 0, 0)
+        }
+        val directPlacement = CheckBox(activity).apply {
+            text = "原地直放（跳过逐块确认）"
+            textSize = 11f
+            setTextColor(Color.parseColor(INK))
+            buttonTintList = ColorStateList.valueOf(Color.parseColor(ACCENT))
+            isChecked = initialConfig.directPlacement
+            minHeight = 0
+            minimumHeight = 0
+            setPadding(0, 0, 0, 0)
+        }
+        val serverVerification = CheckBox(activity).apply {
+            text = "启用服务器验证"
+            textSize = 11f
+            setTextColor(Color.parseColor(INK))
+            buttonTintList = ColorStateList.valueOf(Color.parseColor(ACCENT))
+            isChecked = initialConfig.serverVerification
+            minHeight = 0
+            minimumHeight = 0
+            setPadding(0, 0, 0, 0)
+        }
+        val modeHint = TextView(activity).apply {
+            textSize = 8f
+            setTextColor(Color.parseColor(MUTED))
+            maxLines = 2
+            setPadding(0, 0, 0, dp(1f))
+        }
+        modePanel.addView(directPlacement, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(30f)))
+        modePanel.addView(serverVerification, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(30f)))
+        modePanel.addView(modeHint)
+        root.addView(modePanel)
+
+        var modeExpanded = false
+
+        fun renderModeControls() {
+            val verify = serverVerification.isChecked
+            directPlacement.isEnabled = !verify
+            modeHint.text = when {
+                verify -> "验证模式：逐块等待服务器回执，慢但可靠"
+                directPlacement.isChecked -> "直放模式：站在原地按速度上限连续放置"
+                else -> "两者均关闭时不会自动放置"
+            }
+            modeToggle.text =
+                "模式 · ${if (verify) "验证" else if (directPlacement.isChecked) "直放" else "关闭"}" +
+                    "  ${if (modeExpanded) "收起 ▲" else "调整 ▾"}"
+        }
+
+        modeToggle.setOnClickListener {
+            modeExpanded = !modeExpanded
+            modePanel.visibility = if (modeExpanded) View.VISIBLE else View.GONE
+            renderModeControls()
+        }
+        directPlacement.setOnCheckedChangeListener { _, checked ->
+            ProjectionPrinterSettings.setDirectPlacement(context, checked)
+            runCatching { TpModule.setBuildProjectionPrinterDirectPlacement(checked) }
+            renderModeControls()
+        }
+        serverVerification.setOnCheckedChangeListener { _, checked ->
+            ProjectionPrinterSettings.setServerVerification(context, checked)
+            runCatching { TpModule.setBuildProjectionPrinterServerVerification(checked) }
+            renderModeControls()
+        }
+        renderModeControls()
+
         fun configuredRate(): Int = (rate.progress + ProjectionPrinterSettings.MIN_RATE)
             .coerceIn(ProjectionPrinterSettings.MIN_RATE, ProjectionPrinterSettings.MAX_RATE)
 
@@ -451,7 +541,17 @@ object BuildProjectionPrinterOverlay {
     private fun applyConfig(context: Context, config: ProjectionPrinterSettings.Config) {
         ProjectionPrinterSettings.setEnabled(context, config.enabled)
         ProjectionPrinterSettings.setRate(context, config.blocksPerSecond)
+        ProjectionPrinterSettings.setDirectPlacement(context, config.directPlacement)
+        ProjectionPrinterSettings.setServerVerification(context, config.serverVerification)
         runCatching { TpModule.setBuildProjectionPrinterRate(config.blocksPerSecond) }
+        // Verification is applied before direct placement so the two never
+        // briefly describe a contradictory state on the game thread.
+        runCatching {
+            TpModule.setBuildProjectionPrinterServerVerification(config.serverVerification)
+        }
+        runCatching {
+            TpModule.setBuildProjectionPrinterDirectPlacement(config.directPlacement)
+        }
         runCatching { TpModule.setBuildProjectionPrinterEnabled(config.enabled) }
     }
 

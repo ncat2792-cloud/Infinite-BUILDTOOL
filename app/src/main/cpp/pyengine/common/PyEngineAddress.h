@@ -1,0 +1,48 @@
+#pragma once
+#include <cstdint>
+class PyEngineAddress { public:
+static uintptr_t PythonApi_marshalRead;
+static uintptr_t PythonApi_evalCode;
+static uintptr_t PythonApi_addModule;
+static uintptr_t PythonApi_moduleDict;
+static uintptr_t PythonApi_gilEnsure;
+static uintptr_t PythonApi_gilRelease;
+static uintptr_t PythonApi_decRef;
+static uintptr_t PythonApi_errorFetch;
+static uintptr_t PythonApi_errorClear;
+static uintptr_t PythonApi_objectStr;
+static uintptr_t PythonApi_stringData;
+static uintptr_t PythonApi_initialized;
+static uintptr_t PythonApi_frameWitness;
+static uintptr_t PythonApi_codeCtorWitness;
+static uintptr_t PythonApi_readerWitness;
+static uintptr_t PythonApi_evalExWitness;
+static uintptr_t PythonApi_dispatch;
+static uintptr_t PythonApi_initializeWitness;
+static uintptr_t PythonApi_marshalObjectCall;
+static uintptr_t PythonApi_objectCodeCtorCall;
+static uintptr_t PythonApi_evalCodeExCall;
+static uintptr_t PythonApi_evalFrameCall;
+static uintptr_t PythonApi_dispatchPageOffset;
+static uintptr_t PythonApi_dispatchAddOffset;
+static uintptr_t PythonApi_stringNew;
+static uintptr_t PythonApi_unicodeNew;
+static uintptr_t PythonApi_intNew;
+static uintptr_t PythonApi_longNew;
+static uintptr_t PythonApi_floatNew;
+static uintptr_t PythonApi_tupleNew;
+static uintptr_t PythonApi_tupleSet;
+static uintptr_t PythonApi_frozenNew;
+static uintptr_t PythonApi_getAttr;
+static uintptr_t PythonApi_errorNormalize;
+static uintptr_t PythonApi_unicodeStatefulWitness;
+static uintptr_t PythonApi_frozenCtorWitness;
+static uintptr_t PythonApi_unicodeTailOffset;
+static uintptr_t PythonApi_frozenTailOffset;
+static uintptr_t Player_normalTick;
+static uintptr_t Actor_client;
+static uintptr_t Actor_dimension;
+static uintptr_t Actor_clientFieldOffset;
+static bool ReadyFor(uintptr_t) noexcept;
+static bool IsResolvedAddress(uintptr_t,uintptr_t) noexcept;
+};

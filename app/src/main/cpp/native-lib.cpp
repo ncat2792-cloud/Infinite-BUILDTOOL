@@ -1,4 +1,5 @@
 #include <jni.h>
+#include "pyengine/PyEngineBridge.h"
 #include <atomic>
 #include <cstdint>
 #include <cstdio>
@@ -95,6 +96,13 @@ void initializeHooksIfReady() {
     }
     if (!build_import::InitBuildProjectionHook(base_address)) {
         LOGE("Projection render hook is not ready");
+    }
+    // Resolve and verify the 3.10.5 Python bytecode ABI once the game image is
+    // mapped. Buildings-tool features that execute Python (structure import,
+    // projection printer, inventory transfer) are unavailable until this
+    // succeeds, so it is attempted on every hook pass until verification holds.
+    if (!py_engine::Install()) {
+        LOGE("Python engine not ready: %s", py_engine::Status().c_str());
     }
 }
 

@@ -17,6 +17,7 @@
 #include "ProjectionPrinterSilentRotation.h"
 #include "ProjectionBlockIdentity.h"
 #include "ProjectionWorldMatchRuntime.h"
+#include "DirectPlacementSender.h"
 #include "../tp/PythonUtils.h"
 
 #include <algorithm>
@@ -2024,6 +2025,15 @@ void serviceProjectionPrinterInventorySessionQuarantine() noexcept {
 struct ProjectionPrinterRuntime::RuntimeState {
     bool enabled = false;
     bool reachability_preview_enabled = false;
+    // Immediate placement mode. When enabled the printer calls
+    // GameMode::buildBlock directly instead of issuing one ItemUse and waiting
+    // for the world to confirm it, so blocks land at the configured rate rather
+    // than at the server round-trip rate. server_verification selects the
+    // confirmation path; the two are mutually exclusive and server_verification
+    // always wins when both are on.
+    bool direct_placement_enabled = false;
+    bool server_verification_enabled = true;
+    std::chrono::steady_clock::time_point next_direct_attempt{};
     int32_t blocks_per_second = kDefaultPrinterRate;
     ProjectionPrinterState current_state = ProjectionPrinterState::Off;
     std::string current_status = "打印机已关闭";
@@ -2154,6 +2164,171 @@ int32_t ProjectionPrinterRuntime::rate() const {
     std::lock_guard<std::mutex> lock(mutex_);
     const RuntimeState* const data = stateData();
     return data ? data->blocks_per_second : kDefaultPrinterRate;
+}
+
+void ProjectionPrinterRuntime::dispatchDirectPlacement(
+        std::chrono::steady_clock::time_point now, int32_t configured_rate,
+        uint64_t observed_generation, uint64_t observed_plan,
+        const ProjectionPrinterQueryResult& query_result) {
+    // The backend is verified once at startup. When it is unavailable this mode
+    // reports why and stays inert instead of falling back to unverified code.
+    if (!DirectPlacementSender::available()) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        RuntimeState* const data = stateData();
+        if (data && data->enabled && data->projection_generation == observed_generation &&
+            data->plan_identity == observed_plan) {
+            data->current_state = ProjectionPrinterState::Error;
+            data->current_status = std::string("直放不可用：") +
+                                   DirectPlacementSender::diagnostic();
+        }
+        return;
+    }
+
+    NativeWorldReader reader;
+    if (!reader.open()) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        RuntimeState* const data = stateData();
+        if (data && data->enabled && data->projection_generation == observed_generation &&
+            data->plan_identity == observed_plan) {
+            data->current_state = ProjectionPrinterState::WaitingSupport;
+            data->current_status = "世界区块暂不可读，等待真实方块数据";
+        }
+        return;
+    }
+
+    // Only the currently held hotbar stack can be placed immediately. Reading
+    // the full inventory snapshot is a separate, slower path used by the
+    // verified mode, so direct placement works without touching containers.
+    InventorySnapshot inventory;
+    if (!readInventorySnapshot(&inventory, false) || !inventory.available) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        RuntimeState* const data = stateData();
+        if (data && data->enabled && data->projection_generation == observed_generation &&
+            data->plan_identity == observed_plan) {
+            data->current_state = ProjectionPrinterState::WaitingMaterial;
+            data->current_status = "等待读取快捷栏材料";
+        }
+        return;
+    }
+
+    bool placed = false;
+    std::string placement_error;
+    for (const ProjectionPrinterTarget& target : query_result.targets) {
+        const PrinterPosition position{target.x, target.y, target.z};
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            const RuntimeState* const data = stateData();
+            if (!data || !data->enabled || data->projection_generation != observed_generation ||
+                data->plan_identity != observed_plan || data->completed.count(position) != 0U ||
+                data->skipped.count(position) != 0U) {
+                continue;
+            }
+        }
+        if (!isSupportedTarget(target)) continue;
+
+        NativeBlockView actual;
+        if (!reader.getBlockView(target.x, target.y, target.z, &actual) || !actual.name) continue;
+        bool stair_state_unavailable = false;
+        if (targetMatchesBlock(target, actual, isStairTarget(target.name),
+                               &stair_state_unavailable)) {
+            std::lock_guard<std::mutex> lock(mutex_);
+            RuntimeState* const data = stateData();
+            if (data && data->enabled && data->projection_generation == observed_generation &&
+                data->plan_identity == observed_plan &&
+                data->completed.insert(position).second) {
+                ++data->completed_count;
+            }
+            continue;
+        }
+        if (stair_state_unavailable) continue;
+        if ((!isEmptyPlacementTarget(*actual.name) &&
+             !isPartialDoubleSlabTarget(target, actual)) ||
+            isFluid(*actual.name)) {
+            continue;
+        }
+
+        // A material already in the hotbar is used as-is. Without a matching
+        // hotbar stack this mode leaves the target for the verified path rather
+        // than silently rearranging the player's inventory.
+        const InventorySlot* hotbar_material = nullptr;
+        for (const InventorySlot& slot : inventory.slots) {
+            // Slots 0..8 are the hotbar; anything above lives in the backpack
+            // and would need a container transaction to become placeable.
+            if (slot.slot < 0 || slot.slot >= 9) continue;
+            if (!materialMatchesTarget(slot, target)) continue;
+            hotbar_material = &slot;
+            break;
+        }
+        if (!hotbar_material) continue;
+
+        // buildBlock reads the face from the click; face 1 (top) is what a
+        // straight-down tap on a supporting block produces and is the state the
+        // projection expects for the common case.
+        if (!DirectPlacementSender::place(target.name, target.x, target.y, target.z, 1,
+                                          hotbar_material->slot, &placement_error)) {
+            // One failed attempt per tick keeps a bad target from spinning.
+            break;
+        }
+        placed = true;
+        break;
+    }
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    RuntimeState* const data = stateData();
+    if (!data || !data->enabled || data->projection_generation != observed_generation ||
+        data->plan_identity != observed_plan) {
+        return;
+    }
+    data->next_direct_attempt = now + printerDispatchInterval(configured_rate);
+    if (placed) {
+        data->current_state = ProjectionPrinterState::Running;
+        data->current_status = "直放中：已放置一个方块";
+    } else if (!placement_error.empty()) {
+        data->current_state = ProjectionPrinterState::Error;
+        data->current_status = "直放失败：" + placement_error;
+    } else {
+        data->current_state = ProjectionPrinterState::WaitingMaterial;
+        data->current_status = "附近暂无可直放目标，需快捷栏中有对应材料";
+    }
+}
+
+void ProjectionPrinterRuntime::setDirectPlacementEnabled(bool enabled) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    RuntimeState* const data = stateData();
+    if (!data || data->direct_placement_enabled == enabled) return;
+    data->direct_placement_enabled = enabled;
+    // A placement that is mid-confirmation belongs to the other path; drop it
+    // so the two backends never interleave on the same target.
+    data->pending.reset();
+    data->next_direct_attempt = std::chrono::steady_clock::time_point{};
+    data->current_status = enabled ? "已切换到直放模式" : "已切换到验证模式";
+}
+
+bool ProjectionPrinterRuntime::directPlacementEnabled() const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    const RuntimeState* const data = stateData();
+    return data && data->direct_placement_enabled;
+}
+
+void ProjectionPrinterRuntime::setServerVerificationEnabled(bool enabled) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    RuntimeState* const data = stateData();
+    if (!data || data->server_verification_enabled == enabled) return;
+    data->server_verification_enabled = enabled;
+    data->pending.reset();
+    data->next_direct_attempt = std::chrono::steady_clock::time_point{};
+    data->current_status = enabled ? "已开启服务器验证" : "已关闭服务器验证";
+}
+
+bool ProjectionPrinterRuntime::serverVerificationEnabled() const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    const RuntimeState* const data = stateData();
+    return !data || data->server_verification_enabled;
+}
+
+std::string ProjectionPrinterRuntime::directPlacementDiagnostic() const {
+    return DirectPlacementSender::available() ? DirectPlacementSender::diagnostic()
+                                              : DirectPlacementSender::diagnostic();
 }
 
 void ProjectionPrinterRuntime::setReachabilityPreviewEnabled(bool enabled) {
@@ -2581,6 +2756,27 @@ void ProjectionPrinterRuntime::onGameTick() {
             data->current_state = ProjectionPrinterState::Idle;
             data->current_status = "等待投影原始数据完成加载";
         }
+        return;
+    }
+
+    // ---- Immediate placement -------------------------------------------
+    // Direct placement deliberately skips the confirmation state machine: the
+    // client's own buildBlock assembles and sends the request, so the printer
+    // can keep going at the configured rate instead of stalling on a per-block
+    // round trip. Server verification, when enabled, wins over this mode.
+    bool direct_mode = false;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        RuntimeState* const data = stateData();
+        direct_mode = data && data->enabled && data->direct_placement_enabled &&
+                      !data->server_verification_enabled &&
+                      data->projection_generation == observed_generation &&
+                      data->plan_identity == observed_plan;
+        if (direct_mode && now < data->next_direct_attempt) return;
+    }
+    if (direct_mode) {
+        dispatchDirectPlacement(now, configured_rate, observed_generation, observed_plan,
+                                query_result);
         return;
     }
 

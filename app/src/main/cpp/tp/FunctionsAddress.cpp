@@ -1,16 +1,20 @@
 #include "FunctionsAddress.h"
 
-/*Class : PythonUtils*/
-// NetEase x19 3.9.5.297103 (low) -> 3.9.15.297907 (high) address table.
-// Python-region code (PyImport/PyModule/PyRun/PyGILState) shifted by +0x1A90;
-// setExecLocked (.bss bool) moved 0x1351D350 -> 0x1351EE70, verified through
-// its paired set/get leaf accessors which share the +0x1A90 code shift.
-uintptr_t FunctionsAddress::PythonUtils_setExecLocked                  = 0x1351EE70; //U
-uintptr_t FunctionsAddress::PythonUtils_PyGILState_EnsureMC            = 0x12356D88; //U
-uintptr_t FunctionsAddress::PythonUtils_PyImport_AddModuleMC           = 0x122D63F0; //U
-uintptr_t FunctionsAddress::PythonUtils_PyModule_GetDictMC             = 0x1224ABA0; //U
-uintptr_t FunctionsAddress::PythonUtils_PyRun_StringFlagsMC            = 0x123586A4; //U
-uintptr_t FunctionsAddress::PythonUtils_PyGILState_ReleaseMC           = 0x12356E20; //U
+/* Class: PythonUtils - retired.
+ *
+ * The 3.9.5 client executed embedded Python through these fixed RVAs. The
+ * 3.10.5 client no longer exports that entry point, so the values below are
+ * deliberately cleared: keeping stale addresses here would let a caller jump
+ * into arbitrary code after a client update. Python execution now goes through
+ * pyengine/PyEngineBridge, which resolves the 3.10.5 API by genuine code
+ * signatures and refuses to run when verification fails.
+ */
+uintptr_t FunctionsAddress::PythonUtils_setExecLocked                  = 0;
+uintptr_t FunctionsAddress::PythonUtils_PyGILState_EnsureMC            = 0;
+uintptr_t FunctionsAddress::PythonUtils_PyImport_AddModuleMC           = 0;
+uintptr_t FunctionsAddress::PythonUtils_PyModule_GetDictMC             = 0;
+uintptr_t FunctionsAddress::PythonUtils_PyRun_StringFlagsMC            = 0;
+uintptr_t FunctionsAddress::PythonUtils_PyGILState_ReleaseMC           = 0;
 
 
 /*Actor::normalTick - 游戏主循环 hook*/

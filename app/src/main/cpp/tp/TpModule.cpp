@@ -1055,6 +1055,61 @@ extern "C" JNIEXPORT jint JNICALL Java_com_vdl_kong520_TpModule_getBuildProjecti
     return 4;
 }
 
+extern "C" JNIEXPORT void JNICALL Java_com_vdl_kong520_TpModule_setBuildProjectionPrinterDirectPlacement(
+        JNIEnv*, jclass, jboolean enabled) try {
+    build_import::ProjectionPrinterRuntime::instance().setDirectPlacementEnabled(enabled == JNI_TRUE);
+} catch (const std::exception& exception) {
+    LOGE("setBuildProjectionPrinterDirectPlacement C++ exception: %s", exception.what());
+} catch (...) {
+    LOGE("setBuildProjectionPrinterDirectPlacement unknown C++ exception");
+}
+
+extern "C" JNIEXPORT jboolean JNICALL Java_com_vdl_kong520_TpModule_isBuildProjectionPrinterDirectPlacement(
+        JNIEnv*, jclass) try {
+    return build_import::ProjectionPrinterRuntime::instance().directPlacementEnabled()
+               ? JNI_TRUE : JNI_FALSE;
+} catch (const std::exception& exception) {
+    LOGE("isBuildProjectionPrinterDirectPlacement C++ exception: %s", exception.what());
+    return JNI_FALSE;
+} catch (...) {
+    LOGE("isBuildProjectionPrinterDirectPlacement unknown C++ exception");
+    return JNI_FALSE;
+}
+
+extern "C" JNIEXPORT void JNICALL Java_com_vdl_kong520_TpModule_setBuildProjectionPrinterServerVerification(
+        JNIEnv*, jclass, jboolean enabled) try {
+    build_import::ProjectionPrinterRuntime::instance().setServerVerificationEnabled(enabled == JNI_TRUE);
+} catch (const std::exception& exception) {
+    LOGE("setBuildProjectionPrinterServerVerification C++ exception: %s", exception.what());
+} catch (...) {
+    LOGE("setBuildProjectionPrinterServerVerification unknown C++ exception");
+}
+
+extern "C" JNIEXPORT jboolean JNICALL Java_com_vdl_kong520_TpModule_isBuildProjectionPrinterServerVerification(
+        JNIEnv*, jclass) try {
+    return build_import::ProjectionPrinterRuntime::instance().serverVerificationEnabled()
+               ? JNI_TRUE : JNI_FALSE;
+} catch (const std::exception& exception) {
+    LOGE("isBuildProjectionPrinterServerVerification C++ exception: %s", exception.what());
+    return JNI_TRUE;
+} catch (...) {
+    LOGE("isBuildProjectionPrinterServerVerification unknown C++ exception");
+    return JNI_TRUE;
+}
+
+extern "C" JNIEXPORT jstring JNICALL Java_com_vdl_kong520_TpModule_getBuildProjectionPrinterDirectPlacementDiagnostic(
+        JNIEnv* env, jclass) try {
+    const std::string value =
+        build_import::ProjectionPrinterRuntime::instance().directPlacementDiagnostic();
+    return env->NewStringUTF(value.c_str());
+} catch (const std::exception& exception) {
+    LOGE("getBuildProjectionPrinterDirectPlacementDiagnostic C++ exception: %s", exception.what());
+    return env->NewStringUTF("");
+} catch (...) {
+    LOGE("getBuildProjectionPrinterDirectPlacementDiagnostic unknown C++ exception");
+    return env->NewStringUTF("");
+}
+
 extern "C" JNIEXPORT jint JNICALL Java_com_vdl_kong520_TpModule_getBuildProjectionPrinterState(
         JNIEnv*, jclass) try {
     return static_cast<jint>(build_import::ProjectionPrinterRuntime::instance().state());
@@ -1360,6 +1415,11 @@ bool RegisterTpModuleNatives(JNIEnv* env) noexcept {
         {"isBuildProjectionPrinterEnabled", "()Z", (void*)Java_com_vdl_kong520_TpModule_isBuildProjectionPrinterEnabled},
         {"setBuildProjectionPrinterRate", "(I)V", (void*)Java_com_vdl_kong520_TpModule_setBuildProjectionPrinterRate},
         {"getBuildProjectionPrinterRate", "()I", (void*)Java_com_vdl_kong520_TpModule_getBuildProjectionPrinterRate},
+        {"setBuildProjectionPrinterDirectPlacement", "(Z)V", (void*)Java_com_vdl_kong520_TpModule_setBuildProjectionPrinterDirectPlacement},
+        {"isBuildProjectionPrinterDirectPlacement", "()Z", (void*)Java_com_vdl_kong520_TpModule_isBuildProjectionPrinterDirectPlacement},
+        {"setBuildProjectionPrinterServerVerification", "(Z)V", (void*)Java_com_vdl_kong520_TpModule_setBuildProjectionPrinterServerVerification},
+        {"isBuildProjectionPrinterServerVerification", "()Z", (void*)Java_com_vdl_kong520_TpModule_isBuildProjectionPrinterServerVerification},
+        {"getBuildProjectionPrinterDirectPlacementDiagnostic", "()Ljava/lang/String;", (void*)Java_com_vdl_kong520_TpModule_getBuildProjectionPrinterDirectPlacementDiagnostic},
         {"getBuildProjectionPrinterState", "()I", (void*)Java_com_vdl_kong520_TpModule_getBuildProjectionPrinterState},
         {"getBuildProjectionPrinterStatus", "()Ljava/lang/String;", (void*)Java_com_vdl_kong520_TpModule_getBuildProjectionPrinterStatus},
         {"getBuildProjectionPrinterTotalBlocks", "()J", (void*)Java_com_vdl_kong520_TpModule_getBuildProjectionPrinterTotalBlocks},

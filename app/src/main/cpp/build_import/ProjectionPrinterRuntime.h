@@ -1,11 +1,14 @@
 #ifndef INFINITE_TEXTURE_PROJECTION_PRINTER_RUNTIME_H
 #define INFINITE_TEXTURE_PROJECTION_PRINTER_RUNTIME_H
 
+#include <chrono>
 #include <cstdint>
 #include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
+
+#include "BuildProjectionRuntime.h"
 
 namespace build_import {
 
@@ -58,6 +61,21 @@ public:
     void setRate(int32_t blocks_per_second);
     int32_t rate() const;
 
+    // Immediate placement: call the client's own buildBlock instead of waiting
+    // for a per-block world confirmation. Faster, but a server rejection is not
+    // detected. Off by default.
+    void setDirectPlacementEnabled(bool enabled);
+    bool directPlacementEnabled() const;
+
+    // Server verification: keep the confirmation-driven path that waits for the
+    // client world to reflect each placement. Takes precedence over direct
+    // placement when both are enabled. On by default.
+    void setServerVerificationEnabled(bool enabled);
+    bool serverVerificationEnabled() const;
+
+    // Read-only description of the direct placement backend, for the UI.
+    std::string directPlacementDiagnostic() const;
+
     // Controls only the read-only visual preview of nearby targets that the
     // printer could legally place right now. It may run while automatic
     // printing is off and never sends packets or changes inventory state.
@@ -91,6 +109,14 @@ private:
     struct RuntimeState;
     RuntimeState* stateData();
     const RuntimeState* stateData() const;
+
+    // Immediate-placement pass. Runs on the verified local-player tick and
+    // returns after attempting at most one block, mirroring the verified path's
+    // one-action-per-dispatch discipline.
+    void dispatchDirectPlacement(std::chrono::steady_clock::time_point now,
+                                 int32_t configured_rate, uint64_t observed_generation,
+                                 uint64_t observed_plan,
+                                 const ProjectionPrinterQueryResult& query_result);
 
     mutable std::mutex mutex_;
     std::unique_ptr<RuntimeState> runtime_;
