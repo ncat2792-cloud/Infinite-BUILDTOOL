@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      模块的作用域：网易版正式客户端，以及开发者测试版。
+
+      LSPatch 在补丁目标 APK 时会按这张表推荐模块；漏掉 mctest 的话，
+      测试版上补丁后模块不会加载。
+    -->
+    <string-array name="xposed_scope" translatable="false">
+        <item>com.netease.x19</item>
+        <item>com.netease.mctest</item>
+    </string-array>
+</resources>

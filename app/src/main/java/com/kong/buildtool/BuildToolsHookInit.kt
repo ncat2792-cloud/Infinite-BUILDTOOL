@@ -126,14 +126,17 @@ class BuildToolsHookInit : IXposedHookLoadPackage {
         // prevent the game from completing startup on some builds.
         Thread({
             try {
-                if (NativeLibLoader.load(BuildToolsHookInit::class.java)) {
+                if (NativeLibLoader.load(BuildToolsHookInit::class.java, activity.applicationContext)) {
                     NativeCore.ensureBuildToolsHooks()
                     startMapAnvilUiClosePoll()
                     bridgeLog("native runtime initialized for " + activity.javaClass.name)
                 } else {
                     initialized.set(false)
-                    bridgeLog("building-tools native library was not loaded",
-                        NativeLibLoader.getLastLoadError() ?: NativeCore.getNativeLoadError())
+                    bridgeLog(
+                        "building-tools native library was not loaded\n" +
+                            NativeLibLoader.getLastAttempts(),
+                        NativeLibLoader.getLastLoadError() ?: NativeCore.getNativeLoadError()
+                    )
                 }
             } catch (error: Throwable) {
                 initialized.set(false)

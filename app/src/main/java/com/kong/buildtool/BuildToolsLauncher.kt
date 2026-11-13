@@ -24,7 +24,7 @@ object BuildToolsLauncher {
     private fun openWhenReady(activity: Activity, show: () -> Unit) {
         if (activity.isFinishing || activity.isDestroyed) return
         Thread({
-            val ready = NativeLibLoader.load(BuildToolsHookInit::class.java) &&
+            val ready = NativeLibLoader.load(BuildToolsHookInit::class.java, activity.applicationContext) &&
                 runCatching { NativeCore.ensureBuildToolsHooks() }.isSuccess
             activity.runOnUiThread {
                 if (activity.isFinishing || activity.isDestroyed) return@runOnUiThread
