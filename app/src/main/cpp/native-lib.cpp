@@ -76,11 +76,28 @@ std::atomic<bool> hook_initialization_requested{false};
 std::atomic<bool> hooks_initialized{false};
 std::mutex hook_initialization_mutex;
 
+// 定义在下方；initializeHooksIfReady 需要它做基址交叉校验。
+uintptr_t getModuleBase(const char* name);
+
 void initializeHooksIfReady() {
     std::lock_guard<std::mutex> lock(hook_initialization_mutex);
     if (!hook_initialization_requested.load()) return;
     const uintptr_t base_address = Main::getBaseAddress();
     if (base_address == 0) return;
+
+    // 第二道闸：即便 Main 里已经写过一个基址，这里再独立取一次。
+    // LSPatch 重新打包后同一文件可能有多个映射，两个来源对不上时 getModuleBase
+    // 返回 0；此时绝不能让下面任何一条 Dobby 安装继续跑。
+    const uintptr_t verified_base = getModuleBase("libminecraftpe.so");
+    if (verified_base == 0 || verified_base != base_address) {
+        static bool logged = false;
+        if (!logged) {
+            logged = true;
+            LOGE("base address not verified (cached=0x%lx verified=0x%lx); hooks skipped",
+                 (unsigned long) base_address, (unsigned long) verified_base);
+        }
+        return;
+    }
 
     if (!InitLoopbackPacketSenderCapture(base_address)) {
         LOGE("Command sender capture is not ready; retrying on next request");
@@ -106,7 +123,49 @@ void initializeHooksIfReady() {
     }
 }
 
-uintptr_t getModuleBase(const char* name) {
+// ── 模块基址 ────────────────────────────────────────────────────────
+//
+// 两套来源，必须一致才继续。这在本模块不是可选项：
+//
+//   · dl_iterate_phdr 给出的是链接器眼中的真实装载基址，也是 Dobby 和
+//     所有 dladdr 相关路径使用的那个值 —— 权威。
+//   · /proc/self/maps 只有文本，第一行命中某个名字不一定是 .text 的起点。
+//
+// LSPatch 把目标 APK 重新打包签名后，同一进程里可能出现多个映射到该文件名的
+// 段，文本匹配会挑中错误的一条。基址错 → 基址+RVA 全部错 → Dobby 把 hook
+// 装进别的函数中间或直接跳进未映射内存，而进程不会立刻报错。所以这里交叉
+// 校验，不一致就一个 hook 都不装。
+
+struct ModuleProbe {
+    uintptr_t base = 0;
+    bool found = false;
+};
+
+bool isMinecraftImagePath(const char* path) {
+    if (!path) return false;
+    const char* name = std::strrchr(path, '/');
+    name = name ? name + 1 : path;
+    return std::strcmp(name, "libminecraftpe.so") == 0 ||
+           std::strcmp(name, "libminecraftpe.so (deleted)") == 0;
+}
+
+int probeModuleBase(dl_phdr_info* info, size_t, void* data) {
+    auto* probe = static_cast<ModuleProbe*>(data);
+    if (!probe || !info->dlpi_name || !isMinecraftImagePath(info->dlpi_name)) return 0;
+    probe->base = static_cast<uintptr_t>(info->dlpi_addr);
+    probe->found = probe->base != 0;
+    return 1;
+}
+
+// 通过链接器取基址（权威）。
+uintptr_t linkerModuleBase() {
+    ModuleProbe probe;
+    dl_iterate_phdr(probeModuleBase, &probe);
+    return probe.found ? probe.base : 0;
+}
+
+// 通过 /proc/self/maps 取基址（仅用于交叉校验）。
+uintptr_t mapsModuleBase(const char* name) {
     FILE* maps = std::fopen("/proc/self/maps", "r");
     if (!maps) return 0;
     char line[512];
@@ -119,6 +178,20 @@ uintptr_t getModuleBase(const char* name) {
     }
     std::fclose(maps);
     return base;
+}
+
+// 两个来源都拿到且一致才返回基址；否则返回 0，调用方据此拒绝安装 hook。
+uintptr_t getModuleBase(const char* name) {
+    const uintptr_t linker_base = linkerModuleBase();
+    if (linker_base == 0) return 0;
+    const uintptr_t maps_base = mapsModuleBase(name);
+    if (maps_base != 0 && maps_base != linker_base) {
+        // 不返回任何值：宁可整条功能不可用，也不要带着错误基址去装 hook。
+        LOGE("module base mismatch: linker=0x%lx maps=0x%lx; refusing to install hooks",
+             (unsigned long) linker_base, (unsigned long) maps_base);
+        return 0;
+    }
+    return linker_base;
 }
 
 void waitForMinecraft() {
