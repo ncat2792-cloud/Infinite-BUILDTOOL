@@ -76,7 +76,7 @@ std::atomic<bool> hook_initialization_requested{false};
 std::atomic<bool> hooks_initialized{false};
 std::mutex hook_initialization_mutex;
 
-// 定义在下方；initializeHooksIfReady 需要它做基址交叉校验。
+// 定义在下方；initializeHooksIfReady 需要它。
 uintptr_t getModuleBase(const char* name);
 
 void initializeHooksIfReady() {
@@ -125,18 +125,18 @@ void initializeHooksIfReady() {
 
 // ── 模块基址 ────────────────────────────────────────────────────────
 //
-// 两套来源，必须一致才继续。这在本模块不是可选项：
+// 只用 /proc/self/maps，不用 dl_iterate_phdr。
 //
-//   · dl_iterate_phdr 给出的是链接器眼中的真实装载基址，也是 Dobby 和
-//     所有 dladdr 相关路径使用的那个值 —— 权威。
-//   · /proc/self/maps 只有文本，第一行命中某个名字不一定是 .text 的起点。
+// 原因：LSPatch 补丁后的进程里，dl_iterate_phdr 回调拿到的 dlpi_name 可能
+// 指向临时映射，回调返回后字符串就失效了。之前基址正是从这种悬空指针里读
+// 出来的，于是「基址 + RVA」算出的地址带着 0xff 高字节、甚至是奇数 ——
+// 崩溃现场 lr/pc 全是 0xff 开头、最低位为 9，就是这条路的证据。
 //
-// LSPatch 把目标 APK 重新打包签名后，同一进程里可能出现多个映射到该文件名的
-// 段，文本匹配会挑中错误的一条。基址错 → 基址+RVA 全部错 → Dobby 把 hook
-// 装进别的函数中间或直接跳进未映射内存，而进程不会立刻报错。所以这里交叉
-// 校验，不一致就一个 hook 都不装。
+// /proc/self/maps 是内核给的文本快照，不依赖任何回调期指针，LSPatch 下稳定。
+// 取每行起始地址里「属于该文件、且映射从文件偏移 0 开始」的那一条，
+// 它才是映像基址；单纯字符串匹配会命中中间的段。
 
-struct ModuleProbe {
+struct MapsImage {
     uintptr_t base = 0;
     bool found = false;
 };
@@ -149,49 +149,71 @@ bool isMinecraftImagePath(const char* path) {
            std::strcmp(name, "libminecraftpe.so (deleted)") == 0;
 }
 
-int probeModuleBase(dl_phdr_info* info, size_t, void* data) {
-    auto* probe = static_cast<ModuleProbe*>(data);
-    if (!probe || !info->dlpi_name || !isMinecraftImagePath(info->dlpi_name)) return 0;
-    probe->base = static_cast<uintptr_t>(info->dlpi_addr);
-    probe->found = probe->base != 0;
-    return 1;
+// 解析一行 maps：start-end perms offset dev inode path
+bool parseMapsLine(const char* line, MapsImage* image) {
+    if (!line || !image) return false;
+    unsigned long long start = 0, end = 0, offset = 0;
+    char perms[8] = {0};
+    if (std::sscanf(line, "%llx-%llx %7s %llx", &start, &end, perms, &offset) != 4) return false;
+    // 只认「从文件头开始的映射」：那是 ELF 装载基址。
+    if (offset != 0) return false;
+    const char* path = std::strchr(line, '/');
+    if (!isMinecraftImagePath(path)) return false;
+    image->base = static_cast<uintptr_t>(start);
+    image->found = true;
+    return true;
 }
 
-// 通过链接器取基址（权威）。
-uintptr_t linkerModuleBase() {
-    ModuleProbe probe;
-    dl_iterate_phdr(probeModuleBase, &probe);
-    return probe.found ? probe.base : 0;
-}
-
-// 通过 /proc/self/maps 取基址（仅用于交叉校验）。
-uintptr_t mapsModuleBase(const char* name) {
+uintptr_t getModuleBase(const char* /*name*/) {
     FILE* maps = std::fopen("/proc/self/maps", "r");
-    if (!maps) return 0;
-    char line[512];
+    if (!maps) {
+        LOGE("cannot open /proc/self/maps");
+        return 0;
+    }
+    char line[1024];
     uintptr_t base = 0;
+    int candidates = 0;
     while (std::fgets(line, sizeof(line), maps)) {
-        if (std::strstr(line, name)) {
-            base = static_cast<uintptr_t>(std::strtoull(line, nullptr, 16));
-            break;
-        }
+        MapsImage image;
+        if (!parseMapsLine(line, &image)) continue;
+        ++candidates;
+        if (base == 0) base = image.base;
     }
     std::fclose(maps);
+    if (base == 0) {
+        LOGE("libminecraftpe.so is not mapped yet");
+        return 0;
+    }
+    if (candidates > 1) {
+        // 同一映像被映射两次时无法判断哪个是链接器在用的，宁可不装 hook。
+        LOGE("libminecraftpe.so has %d file-offset-0 mappings; refusing to guess base",
+             candidates);
+        return 0;
+    }
+    LOGI("module base resolved from maps: 0x%lx", (unsigned long)base);
     return base;
 }
 
-// 两个来源都拿到且一致才返回基址；否则返回 0，调用方据此拒绝安装 hook。
-uintptr_t getModuleBase(const char* name) {
-    const uintptr_t linker_base = linkerModuleBase();
-    if (linker_base == 0) return 0;
-    const uintptr_t maps_base = mapsModuleBase(name);
-    if (maps_base != 0 && maps_base != linker_base) {
-        // 不返回任何值：宁可整条功能不可用，也不要带着错误基址去装 hook。
-        LOGE("module base mismatch: linker=0x%lx maps=0x%lx; refusing to install hooks",
-             (unsigned long) linker_base, (unsigned long) maps_base);
-        return 0;
+// 判断 [address, address+size) 是否整段落在某个可执行映射里。
+// 用 /proc/self/maps，不依赖链接器回调。
+bool isExecutableMapping(uintptr_t address, size_t size) {
+    if (address == 0 || size == 0) return false;
+    FILE* maps = std::fopen("/proc/self/maps", "r");
+    if (!maps) return false;
+    char line[1024];
+    bool ok = false;
+    while (std::fgets(line, sizeof(line), maps)) {
+        unsigned long long start = 0, end = 0, offset = 0;
+        char perms[8] = {0};
+        if (std::sscanf(line, "%llx-%llx %7s %llx", &start, &end, perms, &offset) != 4) continue;
+        if (perms[2] != 'x') continue;  // 第 3 位是 'x' 才是可执行
+        if (address < start) continue;
+        if (address + size > end) continue;
+        ok = true;
+        break;
     }
-    return linker_base;
+    std::fclose(maps);
+    return ok;
 }
 
 void waitForMinecraft() {
@@ -263,11 +285,10 @@ bool ResolveMinecraftExecutableOffset(uintptr_t base_address, uintptr_t offset,
     }
     const uintptr_t target = base_address + offset;
     if ((target & 0x3U) != 0) return false;
-    MinecraftExecutableAddressQuery query{
-        base_address, target, required_size, false, false,
-    };
-    dl_iterate_phdr(findMinecraftExecutableAddress, &query);
-    if (!query.module_found || !query.executable) return false;
+
+    // 也用 maps 判断可执行性，理由同 getModuleBase：dl_iterate_phdr 在
+    // LSPatch 下的回调指针不可靠，而这里是每次装 hook 都必经的路径。
+    if (!isExecutableMapping(target, required_size)) return false;
     *address = target;
     return true;
 }
