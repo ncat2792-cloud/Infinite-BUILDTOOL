@@ -3,11 +3,12 @@ name: Build APK
 on:
   push:
     branches: [ main, master ]
+    tags: [ 'v*' ]
   pull_request:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -82,3 +83,12 @@ jobs:
           path: artifacts/*.apk
           if-no-files-found: warn
           retention-days: 30
+
+      # 打了 v* 标签时把产物直接发到 Releases。
+      # 平常推 main 只留在 Artifacts 里，方便区分「这版能不能直接用」。
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.apk
+          generate_release_notes: true
