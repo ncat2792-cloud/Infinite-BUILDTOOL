@@ -34,11 +34,6 @@
         <meta-data
             android:name="xposedminversion"
             android:value="53" />
-        <!-- LSPatch 用这一项决定补丁后默认把模块挂到哪些包上；
-             不写的话导入 lspatch.jar 时得手动勾选，容易漏。 -->
-        <meta-data
-            android:name="xposedscope"
-            android:resource="@array/xposed_scope" />
     </application>
 
 </manifest>

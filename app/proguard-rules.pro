@@ -17,16 +17,6 @@
 -keep,allowoptimization class com.kong.buildtool.BuildToolsHookInit { *; }
 -keep,allowoptimization class com.vdl.kong520.NativeCore { *; }
 
-# 原生侧用 FindClass("com/vdl/kong520/TpModule") 按描述符查这个类并
-# RegisterNatives 注册 49 个入口；类名一旦被混淆就整个注册失败。
--keep,allowoptimization class com.vdl.kong520.TpModule { *; }
-
-# NativeLibLoader 用反射调 ClassLoader#findLibrary，LSPatch 下还要读
-# Context#getApplicationInfo().nativeLibraryDir —— 保留成员名以免反射失手。
--keepclassmembers class * extends java.lang.ClassLoader {
-    protected java.lang.String findLibrary(java.lang.String);
-}
-
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
 # class:

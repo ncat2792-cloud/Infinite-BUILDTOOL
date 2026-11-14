@@ -54,23 +54,6 @@ public final class NativeCore {
         return soLoaded;
     }
 
-    /**
-     * 标记 native 库「已由外部加载成功」。
-     *
-     * LSPatch 场景下库可能已被宿主 ClassLoader 加载（System.loadLibrary 成功），
-     * 但那条路不经过 loadNative / loadNativePath，所以要显式同步这个标志，
-     * 否则 isNativeReady() 一直是 false，每次进面板都会重复加载。
-     *
-     * 副作用是正确的：库确实已经在进程里了，后续 JNI 调用可以直接走。
-     */
-    static boolean markLoaded() {
-        synchronized (SO_LOAD_LOCK) {
-            soLoaded = true;
-            soLoadError = null;
-            return true;
-        }
-    }
-
     /** Returns the most recent native-loader error for injected-host diagnostics. */
     public static Throwable getNativeLoadError() {
         return soLoadError;
